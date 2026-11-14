@@ -1,0 +1,464 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#07111f">
+<title>SPHEREx Explorer | Infrared Sky Observatory</title>
+<meta name="description" content="Explorador independiente de datos astronómicos SPHEREx mediante el archivo IRSA.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#07111f;--panel:#0d1b2b;--panel2:#102238;--line:#20364d;--text:#edf5ff;--muted:#91a8bf;--cyan:#57d8e8;--blue:#6e9cff;--green:#76e0b0;--red:#ff8585}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at 70% -15%,#17365a 0,transparent 38%),var(--bg);color:var(--text);font-family:Manrope,Arial,sans-serif;min-height:100vh}
+button,input,select{font:inherit}
+button{cursor:pointer}
+header{border-bottom:1px solid var(--line);background:#07111fe8;position:sticky;top:0;z-index:5;backdrop-filter:blur(14px)}
+.top{max-width:1450px;margin:auto;padding:15px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:42px;height:42px;border:1px solid #3e8099;border-radius:13px;display:grid;place-items:center;color:var(--cyan);font-size:22px;background:linear-gradient(145deg,#173b56,#0b1c30)}
+.brand h1{font-size:17px;margin:0;letter-spacing:.08em}
+.brand p{margin:3px 0 0;font-size:10px;color:var(--muted);letter-spacing:.17em}
+.status{font:11px "DM Mono",monospace;color:var(--green);border:1px solid #285b50;padding:7px 10px;border-radius:30px}
+main{max-width:1450px;margin:auto;padding:28px 24px 60px}
+.hero{padding:30px 0 26px;max-width:900px}
+.eyebrow{font:11px "DM Mono",monospace;color:var(--cyan);letter-spacing:.2em;text-transform:uppercase}
+.hero h2{font-size:clamp(29px,4vw,48px);line-height:1.12;margin:12px 0}
+.hero p{color:var(--muted);line-height:1.7;max-width:760px;font-size:14px}
+.layout{display:grid;grid-template-columns:340px minmax(0,1fr);gap:18px;align-items:start}
+.panel{background:linear-gradient(160deg,#102238,#0b1929);border:1px solid var(--line);border-radius:17px;padding:19px;box-shadow:0 14px 45px #0002}
+.panel h3{font-size:14px;margin:0 0 16px;letter-spacing:.04em}
+label{display:block;color:#b8cadd;font-size:11px;margin:13px 0 6px}
+input,select{width:100%;padding:11px 12px;color:var(--text);background:#071522;border:1px solid #294158;border-radius:9px;outline:none}
+input:focus,select:focus{border-color:var(--cyan)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btn{border:1px solid #31506c;background:#142b42;color:var(--text);padding:10px 13px;border-radius:9px;font-size:12px;font-weight:700}
+.btn:hover{border-color:var(--cyan);background:#183a54}
+.btn.primary{background:linear-gradient(100deg,#167c98,#2865a6);border:0;color:white}
+.btn.primary:hover{filter:brightness(1.12)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.full{width:100%;margin-top:16px}
+.hint{font-size:10px;color:var(--muted);line-height:1.6;margin-top:8px}
+.collections{display:grid;gap:9px;margin-top:9px}
+.check{display:flex;align-items:center;gap:8px;color:#c4d4e3;font-size:11px}
+.check input{width:auto;accent-color:var(--cyan)}
+.quick{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.quick button{font-size:10px;padding:6px 8px;border-radius:7px}
+.right{display:grid;gap:18px;min-width:0}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.metric{background:#0d1b2b;border:1px solid var(--line);border-radius:13px;padding:14px}
+.metric small{color:var(--muted);font-size:10px}
+.metric strong{display:block;font:22px "DM Mono",monospace;margin-top:7px}
+.toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.toolbar h3{margin:0}
+.toolbar span{font-size:11px;color:var(--muted)}
+.tablewrap{overflow:auto;border:1px solid var(--line);border-radius:12px}
+table{border-collapse:collapse;width:100%;min-width:760px;font-size:11px}
+th{text-align:left;color:#9bb5ca;background:#102238;font-weight:600;padding:12px 10px;white-space:nowrap}
+td{padding:11px 10px;border-top:1px solid #1b3045;color:#d7e5f1;vertical-align:middle}
+tr:hover td{background:#14283c}
+tr.selected td{background:#18344a}
+.mono{font-family:"DM Mono",monospace}
+.action{background:#16354c;border:1px solid #315c77;color:#aeeaf2;border-radius:7px;padding:6px 9px;font-size:10px}
+.viewer{min-height:340px;background:#050b13;border:1px solid #294158;border-radius:13px;overflow:hidden;position:relative}
+.viewer iframe{width:100%;height:510px;border:0;background:#050b13}
+.empty{min-height:320px;display:grid;place-items:center;text-align:center;padding:28px;color:var(--muted)}
+.empty .symbol{font-size:42px;color:#4f829f;margin-bottom:12px}
+.viewerbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.viewerbar h3{margin:0;font-size:14px}
+.vieweractions{display:flex;gap:7px;flex-wrap:wrap}
+.notice{padding:12px 14px;border-radius:10px;border:1px solid #29445b;background:#0b1a29;color:#a9bfd2;font-size:11px;line-height:1.6}
+.notice.error{border-color:#78464b;color:#ffc0c0}
+.notice.good{border-color:#2b6556;color:#b2f2d6}
+#message{margin-bottom:12px;display:none}
+footer{max-width:1450px;margin:auto;padding:20px 24px 32px;color:#71879d;font-size:10px;line-height:1.7;border-top:1px solid var(--line)}
+footer a{color:#9fdde8}
+a{color:#8fddea}
+@media(max-width:900px){.layout{grid-template-columns:1fr}.top{padding:12px 16px}main{padding:20px 15px 45px}}
+@media(max-width:520px){.metrics{grid-template-columns:1fr 1fr}.metrics .metric:last-child{grid-column:span 2}.hero{padding-top:18px}.brand h1{font-size:14px}.status{font-size:9px}.panel{padding:15px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="top">
+    <div class="brand">
+      <div class="logo">✦</div>
+      <div><h1>SPHEREx EXPLORER</h1><p>INFRARED SKY DATA LAB</p></div>
+    </div>
+    <div class="status" id="connectionStatus">● SERVICIO SIN CONFIGURAR</div>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="eyebrow">Independent astronomical research interface</div>
+    <h2>Explore the infrared universe.</h2>
+    <p>Consulta observaciones espectrales de SPHEREx directamente desde el archivo IRSA. Busca regiones del cielo, examina los productos disponibles y abre imágenes FITS en un visor astronómico interactivo.</p>
+  </section>
+
+  <div id="message" class="notice"></div>
+
+  <div class="layout">
+    <aside class="panel">
+      <h3>01 / Parámetros de búsqueda</h3>
+
+      <label for="objectName">Nombre del objeto (opcional)</label>
+      <input id="objectName" placeholder="Ej. Barnard's Star">
+
+      <div class="grid2">
+        <div><label for="ra">Ascensión recta (RA °)</label><input id="ra" type="number" step="any" placeholder="269.452077"></div>
+        <div><label for="dec">Declinación (DEC °)</label><input id="dec" type="number" step="any" placeholder="4.693365"></div>
+      </div>
+
+      <label for="radius">Radio de búsqueda</label>
+      <select id="radius">
+        <option value="0.01">0.01° — 36 segundos de arco</option>
+        <option value="0.03">0.03° — 1.8 minutos de arco</option>
+        <option value="0.05" selected>0.05° — 3 minutos de arco</option>
+        <option value="0.1">0.10° — 6 minutos de arco</option>
+        <option value="0.25">0.25° — 15 minutos de arco</option>
+        <option value="0.5">0.50° — 30 minutos de arco</option>
+      </select>
+
+      <label>Colecciones IRSA</label>
+      <div class="collections">
+        <label class="check"><input type="checkbox" value="spherex_dr1" checked> DR1 · Wide Survey</label>
+        <label class="check"><input type="checkbox" value="spherex_dr1_deep"> DR1 · Deep Survey</label>
+        <label class="check"><input type="checkbox" value="spherex_qr3" checked> QR3 · Wide Survey</label>
+        <label class="check"><input type="checkbox" value="spherex_qr3_deep"> QR3 · Deep Survey</label>
+        <label class="check"><input type="checkbox" value="spherex_dr1_cube"> DR1 · All-Sky Cube</label>
+      </div>
+
+      <label for="maxrec">Máximo de registros por colección</label>
+      <select id="maxrec">
+        <option value="10">10 registros</option>
+        <option value="25" selected>25 registros</option>
+        <option value="50">50 registros</option>
+        <option value="100">100 registros</option>
+      </select>
+
+      <button class="btn primary full" id="searchBtn">⌕ &nbsp; CONSULTAR IRSA</button>
+      <div class="hint">Las búsquedas utilizan las coordenadas J2000/ICRS y los registros publicados por IRSA. La disponibilidad puede variar según la cobertura del archivo.</div>
+
+      <label>Objetos de prueba</label>
+      <div class="quick">
+        <button class="btn" data-name="Barnard's Star" data-ra="269.452077" data-dec="4.693365">Barnard</button>
+        <button class="btn" data-name="Epsilon Indi" data-ra="330.840224" data-dec="-56.786">Epsilon Indi</button>
+        <button class="btn" data-name="WISE 0855" data-ra="133.795129" data-dec="-7.245147">WISE 0855</button>
+        <button class="btn" data-name="RW Aurigae" data-ra="76.956526" data-dec="30.401438">RW Aur</button>
+      </div>
+    </aside>
+
+    <section class="right">
+      <div class="metrics">
+        <div class="metric"><small>REGISTROS ENCONTRADOS</small><strong id="totalCount">—</strong></div>
+        <div class="metric"><small>COLECCIONES CONSULTADAS</small><strong id="collectionCount">—</strong></div>
+        <div class="metric"><small>ESTADO DE CONSULTA</small><strong id="queryState" style="font-size:15px">EN ESPERA</strong></div>
+      </div>
+
+      <section class="panel">
+        <div class="toolbar">
+          <h3>02 / Resultados de archivo</h3>
+          <div>
+            <button class="btn" id="exportBtn" disabled>↓ Exportar CSV</button>
+          </div>
+        </div>
+        <div class="tablewrap">
+          <table>
+            <thead><tr>
+              <th>OBSERVACIÓN</th><th>OBJETO / TARGET</th><th>COLECCIÓN</th>
+              <th>BANDA</th><th>FECHA</th><th>RA / DEC</th><th>VISUALIZAR</th>
+            </tr></thead>
+            <tbody id="resultsBody">
+              <tr><td colspan="7" style="text-align:center;color:#91a8bf;padding:30px">Configura una búsqueda para consultar el archivo SPHEREx.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="hint" id="resultNote">Los resultados se obtendrán desde IRSA; esta tabla no contiene observaciones precargadas.</p>
+      </section>
+
+      <section class="panel">
+        <div class="viewerbar">
+          <h3>03 / Visor de imágenes FITS</h3>
+          <div class="vieweractions">
+            <button class="btn" id="cutoutBtn" disabled>Crear recorte</button>
+            <button class="btn" id="openFitsBtn" disabled>Abrir FITS</button>
+          </div>
+        </div>
+        <div class="viewer" id="viewer">
+          <div class="empty"><div><div class="symbol">⌁</div><strong>Visor astronómico</strong><p>Selecciona una observación de la tabla para cargar su archivo FITS.</p></div></div>
+        </div>
+        <p class="hint" id="viewerInfo">El visor utiliza JS9 para interpretar archivos FITS. Los datos y las imágenes proceden del archivo IRSA, no de imágenes de muestra.</p>
+      </section>
+
+      <section class="panel">
+        <h3>04 / Información del producto seleccionado</h3>
+        <div id="details" class="notice">Aún no hay una observación seleccionada.</div>
+      </section>
+    </section>
+  </div>
+</main>
+
+<footer>
+  <strong>SPHEREx Explorer</strong> es un proyecto independiente de exploración científica y no es un producto oficial de NASA, JPL, Caltech ni IRSA. Los datos astronómicos se consultan desde el archivo público de IRSA. La disponibilidad, calibración y calidad de cada producto deben verificarse en su documentación científica.
+  <br>Fuentes: <a href="https://irsa.ipac.caltech.edu/spherex-archive-documentation/" target="_blank" rel="noopener">IRSA SPHEREx Archive</a> · <a href="https://www.js9.si.edu/" target="_blank" rel="noopener">JS9 FITS Viewer</a>
+</footer>
+
+<script>
+/* IMPORTANTE: reemplaza esta dirección después de publicar tu Cloudflare Worker. */
+const API_BASE = "https://TU-WORKER.TU-CUENTA.workers.dev";
+
+let observations = [];
+let selectedObservation = null;
+let selectedRow = null;
+
+const $ = id => document.getElementById(id);
+
+function showMessage(message, type="") {
+  const box=$("message");
+  box.textContent=message;
+  box.className="notice "+type;
+  box.style.display="block";
+}
+function hideMessage(){ $("message").style.display="none"; }
+
+function apiReady(){
+  return API_BASE.startsWith("https://") &&
+         !API_BASE.includes("TU-WORKER");
+}
+function apiUrl(path,params={}) {
+  const url=new URL(API_BASE+path);
+  Object.entries(params).forEach(([k,v])=>url.searchParams.set(k,v));
+  return url.toString();
+}
+
+function parseCSV(text) {
+  const rows=[]; let row=[],field="",quoted=false;
+  for(let i=0;i<text.length;i++){
+    const c=text[i],n=text[i+1];
+    if(c==='"' && quoted && n==='"'){field+='"';i++;}
+    else if(c==='"'){quoted=!quoted;}
+    else if(c==="," && !quoted){row.push(field);field="";}
+    else if((c==="\n"||c==="\r")&&!quoted){
+      if(c==="\r"&&n==="\n")i++;
+      row.push(field);
+      if(row.some(x=>x.trim()!==""))rows.push(row);
+      row=[];field="";
+    } else field+=c;
+  }
+  row.push(field);
+  if(row.some(x=>x.trim()!==""))rows.push(row);
+  if(rows.length<2)return [];
+  const headers=rows.shift().map(h=>h.trim().replace(/^"|"$/g,""));
+  return rows.map(r=>{
+    const obj={};
+    headers.forEach((h,i)=>obj[h]=(r[i]??"").trim());
+    return obj;
+  });
+}
+
+function value(obj,...keys){
+  for(const key of keys){
+    if(obj[key]!==undefined && obj[key]!==null && obj[key]!=="")return obj[key];
+  }
+  return "—";
+}
+
+async function resolveName(name){
+  const response=await fetch(apiUrl("/api/name",{q:name}));
+  if(!response.ok)throw new Error("No se pudo resolver el nombre del objeto.");
+  return await response.json();
+}
+
+async function searchIRSA(){
+  hideMessage();
+  if(!apiReady()){
+    showMessage("Primero debes publicar el Cloudflare Worker y colocar su dirección en la constante API_BASE del archivo index.html.","error");
+    return;
+  }
+
+  const name=$("objectName").value.trim();
+  let ra=$("ra").value.trim(), dec=$("dec").value.trim();
+
+  try{
+    if(name && (!ra||!dec)){
+      $("queryState").textContent="RESOLVIENDO";
+      const coords=await resolveName(name);
+      ra=String(coords.ra);dec=String(coords.dec);
+      $("ra").value=ra;$("dec").value=dec;
+    }
+    if(ra===""||dec==="")throw new Error("Introduce RA y DEC o escribe el nombre de un objeto que pueda resolverse.");
+    const r=Number(ra),d=Number(dec);
+    if(!Number.isFinite(r)||!Number.isFinite(d)||r<0||r>=360||d< -90||d>90)
+      throw new Error("Coordenadas no válidas. RA debe estar entre 0 y 360; DEC entre -90 y 90.");
+
+    const collections=[...document.querySelectorAll('.collections input:checked')].map(x=>x.value);
+    if(!collections.length)throw new Error("Selecciona al menos una colección.");
+    const radius=$("radius").value;
+    const maxrec=$("maxrec").value;
+
+    $("searchBtn").disabled=true;
+    $("queryState").textContent="CONSULTANDO";
+    $("resultsBody").innerHTML='<tr><td colspan="7" style="text-align:center;padding:30px">Consultando los servidores de IRSA…</td></tr>';
+    observations=[];
+    selectedObservation=null;
+    $("exportBtn").disabled=true;
+    $("cutoutBtn").disabled=true;
+    $("openFitsBtn").disabled=true;
+    $("details").textContent="Esperando resultados de IRSA…";
+    $("viewer").innerHTML='<div class="empty"><div><div class="symbol">◌</div><strong>Consultando archivo astronómico</strong><p>La respuesta depende de IRSA y de la cobertura disponible.</p></div></div>';
+
+    const requests=collections.map(async collection=>{
+      const url=apiUrl("/api/sia",{collection,ra:r,dec:d,radius,maxrec});
+      const response=await fetch(url);
+      const body=await response.text();
+      if(!response.ok)throw new Error(collection+": "+body.slice(0,220));
+      return {collection,rows:parseCSV(body)};
+    });
+
+    const settled=await Promise.allSettled(requests);
+    const errors=[];
+    settled.forEach((result,i)=>{
+      if(result.status==="fulfilled"){
+        result.value.rows.forEach(row=>{
+          row._collection=result.value.collection;
+          observations.push(row);
+        });
+      }else errors.push(collections[i]+": "+result.reason.message);
+    });
+
+    $("totalCount").textContent=observations.length;
+    $("collectionCount").textContent=settled.filter(x=>x.status==="fulfilled").length;
+    $("queryState").textContent=errors.length?"PARCIAL":"COMPLETADA";
+    $("exportBtn").disabled=observations.length===0;
+
+    renderResults();
+    if(errors.length)showMessage("Algunas colecciones no respondieron: "+errors.join(" | "),"error");
+    else if(observations.length)showMessage("Consulta completada. Se recibieron "+observations.length+" registros de IRSA.","good");
+    else showMessage("IRSA respondió, pero no devolvió observaciones para estas coordenadas, radio y colecciones.","");
+    $("resultNote").textContent="Centro consultado: RA "+r+"°, DEC "+d+"° · Radio "+radius+"° · Respuesta obtenida en tiempo real desde IRSA.";
+  }catch(error){
+    $("queryState").textContent="ERROR";
+    $("resultsBody").innerHTML='<tr><td colspan="7" style="text-align:center;padding:25px">No fue posible completar la consulta.</td></tr>';
+    showMessage(error.message,"error");
+  }finally{
+    $("searchBtn").disabled=false;
+  }
+}
+
+function renderResults(){
+  const body=$("resultsBody");
+  if(!observations.length){
+    body.innerHTML='<tr><td colspan="7" style="text-align:center;padding:28px;color:#91a8bf">No se encontraron registros.</td></tr>';
+    return;
+  }
+  body.innerHTML=observations.map((o,i)=>{
+    const obs=value(o,"obs_id","obs_publisher_did","dp_id");
+    const target=value(o,"target_name","target","object");
+    const band=value(o,"energy_bandpassname","band","em_band");
+    const date=value(o,"t_min","date_obs","obs_date");
+    const ra=value(o,"s_ra","ra");
+    const dec=value(o,"s_dec","dec");
+    return `<tr data-index="${i}">
+      <td class="mono">${escapeHTML(obs)}</td>
+      <td>${escapeHTML(target)}</td>
+      <td>${escapeHTML(o._collection)}</td>
+      <td>${escapeHTML(band)}</td>
+      <td class="mono">${escapeHTML(date)}</td>
+      <td class="mono">${escapeHTML(ra)} / ${escapeHTML(dec)}</td>
+      <td><button class="action" data-view="${i}">Abrir</button></td>
+    </tr>`;
+  }).join("");
+  body.querySelectorAll("[data-view]").forEach(btn=>{
+    btn.addEventListener("click",()=>selectObservation(Number(btn.dataset.view)));
+  });
+}
+
+function escapeHTML(value){
+  return String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+
+function selectObservation(index){
+  const o=observations[index];
+  if(!o)return;
+  selectedObservation=o;
+  document.querySelectorAll("#resultsBody tr").forEach(tr=>tr.classList.remove("selected"));
+  selectedRow=document.querySelector(`#resultsBody tr[data-index="${index}"]`);
+  if(selectedRow)selectedRow.classList.add("selected");
+
+  const access=value(o,"access_url");
+  $("details").innerHTML=`
+    <div><strong>Identificador:</strong> ${escapeHTML(value(o,"obs_id","obs_publisher_did"))}</div>
+    <div><strong>Colección:</strong> ${escapeHTML(o._collection)}</div>
+    <div><strong>Objeto:</strong> ${escapeHTML(value(o,"target_name","target"))}</div>
+    <div><strong>Banda espectral:</strong> ${escapeHTML(value(o,"energy_bandpassname"))}</div>
+    <div><strong>Límite inferior:</strong> ${escapeHTML(value(o,"em_min"))}</div>
+    <div><strong>Límite superior:</strong> ${escapeHTML(value(o,"em_max"))}</div>
+    <div><strong>Tiempo:</strong> ${escapeHTML(value(o,"t_min"))}</div>
+    <div><strong>Formato:</strong> ${escapeHTML(value(o,"access_format"))}</div>
+    <div style="margin-top:9px;overflow-wrap:anywhere"><strong>URL del producto:</strong><br>${escapeHTML(access)}</div>`;
+  $("openFitsBtn").disabled=!access||access==="—";
+  $("cutoutBtn").disabled=!access||access==="—";
+  $("viewer").innerHTML='<div class="empty"><div><div class="symbol">✦</div><strong>Observación seleccionada</strong><p>Pulsa “Abrir FITS” para cargar el producto en el visor astronómico.</p></div></div>';
+  $("viewerInfo").textContent="Producto seleccionado: "+value(o,"obs_id","obs_publisher_did");
+}
+
+function getFileProxyURL(cutout=false){
+  if(!selectedObservation)return null;
+  const access=selectedObservation.access_url;
+  if(!access||access==="—")return null;
+  const params={url:access};
+  if(cutout){
+    params.center=$("ra").value+","+ $("dec").value;
+    params.size=$("radius").value;
+  }
+  return apiUrl(cutout?"/api/cutout":"/api/file",params);
+}
+
+function showInJS9(cutout=false){
+  const fileURL=getFileProxyURL(cutout);
+  if(!fileURL)return;
+  const viewerURL="https://js9.si.edu/js9/js9.html?url="+encodeURIComponent(fileURL);
+  $("viewer").innerHTML=`<iframe title="Visor astronómico JS9" allowfullscreen src="${viewerURL}"></iframe>`;
+  $("viewerInfo").textContent=cutout
+    ?"Se solicitó un recorte FITS al servicio de IRSA. La carga depende de la respuesta del archivo y del visor JS9."
+    :"Cargando el archivo FITS seleccionado en JS9. Los productos pueden ser grandes y tardar en abrirse.";
+}
+
+function exportCSV(){
+  if(!observations.length)return;
+  const headers=[...new Set(observations.flatMap(o=>Object.keys(o)))];
+  const quote=v=>'"'+String(v??"").replace(/"/g,'""')+'"';
+  const csv=[headers.map(quote).join(","),...observations.map(o=>headers.map(h=>quote(o[h]??"")).join(","))].join("\r\n");
+  const blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");a.href=url;a.download="spherex_irsa_results.csv";a.click();
+  URL.revokeObjectURL(url);
+}
+
+$("searchBtn").addEventListener("click",searchIRSA);
+$("exportBtn").addEventListener("click",exportCSV);
+$("openFitsBtn").addEventListener("click",()=>showInJS9(false));
+$("cutoutBtn").addEventListener("click",()=>showInJS9(true));
+
+document.querySelectorAll("[data-ra]").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    $("objectName").value=btn.dataset.name;
+    $("ra").value=btn.dataset.ra;
+    $("dec").value=btn.dataset.dec;
+  });
+});
+
+if(apiReady()){
+  $("connectionStatus").textContent="● API CONFIGURADA";
+  $("connectionStatus").style.color="#76e0b0";
+}else{
+  $("connectionStatus").textContent="● CONFIGURACIÓN PENDIENTE";
+  $("connectionStatus").style.color="#ffd28b";
+}
+</script>
+</body>
+</html>
