@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=3">
+<link rel="stylesheet" href="styles.css?v=4">
 </head>
 <body>
 <canvas id="stars" aria-hidden="true"></canvas>
@@ -125,20 +125,8 @@
         <p class="small" id="mapNote">Mapa actual: IRSA Viewer, todo el cielo. Introduce unas coordenadas para viajar a una región.</p>
       </section>
 
-      <section class="card" id="irsa">
-        <div class="sect-num">04 / ARCHIVO EN VIVO</div>
-        <h3>IRSA en vivo — documentación del archivo</h3>
-        <p class="small">Documentación oficial de SPHEREx en IRSA, incrustada en esta página. Todos los datos mostrados proceden únicamente de IRSA.</p>
-        <p>
-          <a class="btn" href="https://irsa.ipac.caltech.edu/spherex-archive-documentation/" target="_blank" rel="noopener" style="text-decoration:none">Abrir documentación IRSA ↗</a>
-          <button class="btn" id="healthBtn">Comprobar estado del servicio</button>
-        </p>
-        <div id="health" class="notice" style="display:none"></div>
-        <iframe class="irsa" title="Documentación del archivo SPHEREx en IRSA" src="https://irsa.ipac.caltech.edu/spherex-archive-documentation/"></iframe>
-      </section>
-
       <section class="card" id="aprende">
-        <div class="sect-num">05 / APRENDE</div>
+        <div class="sect-num">04 / APRENDE</div>
         <h3>Todo lo que necesitas saber para explorar el cielo</h3>
         <div class="cards">
           <div class="info"><h4>¿Qué es SPHEREx?</h4><p>Es un telescopio espacial de la NASA que observa el cielo en luz infrarroja. Desde 2025 recorre todo el cielo una y otra vez, tomando fotografías en muchos colores invisibles para el ojo humano. Con esas fotos, los astrónomos estudian galaxias, estrellas, cometas y el origen del agua y de las moléculas de la vida en el universo.</p></div>
@@ -175,7 +163,7 @@
       </section>
 
       <section class="card" id="galeria">
-        <div class="sect-num">06 / GALERÍA DE IMÁGENES REALES</div>
+        <div class="sect-num">05 / GALERÍA DE IMÁGENES REALES</div>
         <h3>Fotos reales de SPHEREx y del cielo</h3>
         <p class="small">Todas estas fotos son reales, de NASA/JPL-Caltech. La primera es una imagen del cielo tomada por SPHEREx; las demás muestran el telescopio antes de su lanzamiento. Pulsa una foto para verla grande en la biblioteca de imágenes de la NASA.</p>
         <div class="gallery">
@@ -221,6 +209,11 @@
   <strong>SPHEREx EXPLORER</strong><br>
   Independent astronomical research interface · Data source: NASA/IPAC Infrared Science Archive (IRSA)<br>
   This is an independent research interface and is not an official NASA or SPHEREx mission product.
+  <p class="footlinks">
+    <a href="https://irsa.ipac.caltech.edu/spherex-archive-documentation/" target="_blank" rel="noopener">Documentación del archivo SPHEREx en IRSA ↗</a>
+    <button class="btn" id="healthBtn">Comprobar estado del servicio</button>
+  </p>
+  <div id="health" class="notice" style="display:none"></div>
 </footer>
 <script>
 /* Campo de estrellas realista generado en el lienzo de fondo. */
@@ -242,6 +235,6 @@
   addEventListener("resize",size); size(); requestAnimationFrame(draw);
 })();
 </script>
-<script src="app.js?v=3"></script>
+<script src="app.js?v=4"></script>
 </body>
 </html>
