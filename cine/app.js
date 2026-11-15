@@ -71,6 +71,40 @@ function loadFromURL() {
   return !!(p.get("ra") && p.get("dec"));
 }
 
+/* ---- Datos curiosos y mapa real de IRSA ---- */
+const FUNFACTS = {
+  "Barnard's Star": "💡 ¡Barnard es la estrella que más rápido se mueve en el cielo! En un año camina tanto como el ancho de la Luna llena visto desde la Tierra. 🌕",
+  "Epsilon Indi B": "💡 ¡Epsilon Indi B son en realidad DOS enanas marrones bailando juntas alrededor de una estrella! Son tan frías que no brillan como el Sol. 🟤🟤",
+  "WISE 0855": "💡 ¡WISE 0855 es la enana marrón más fría que conocemos! Está a unos -13 °C… ¡más fría que un congelador! 🥶",
+  "RW Aurigae": "💡 ¡RW Aur es una estrella bebé que cambia de brillo porque tiene polvo a su alrededor, como si se pusiera gafas de sol! 😎",
+  "R Draconis": "💡 ¡R Draconis late como un corazón gigante: se hace grande y brillante, luego chiquita, cada 245 días! ❤️"
+};
+function showFunFact(name) {
+  if (FUNFACTS[name]) $("funFact").textContent = FUNFACTS[name];
+}
+function irsaViewerURL(ra, dec) { return "https://irsa.ipac.caltech.edu/irsaviewer/"; }
+function finderURL(ra, dec) {
+  // Finder Chart de IRSA: mode=getResult centra el mapa en locstr="RA Dec".
+  return "https://irsa.ipac.caltech.edu/applications/finderchart/servlet/api?mode=getResult&locstr=" + encodeURIComponent(ra + " " + dec);
+}
+function goToMap() {
+  const ra = $("mapRa").value.trim() || $("ra").value.trim();
+  const dec = $("mapDec").value.trim() || $("dec").value.trim();
+  if (!ra || !dec) { msg("Escribe RA y DEC para viajar en el mapa. 🗺️", ""); return; }
+  $("mapRa").value = ra; $("mapDec").value = dec;
+  $("mapFinder").src = finderURL(ra, dec);
+  $("mapNote").textContent = `🗺️ Mapa centrado en RA ${ra}°, DEC ${dec}°. Si el mapa no carga dentro de la página, ábrelo con los botones de arriba, ¡es el mapa real de IRSA!`;
+  showMapTab("finder");
+  msg(`¡Viajando en el mapa de IRSA a RA ${ra}°, DEC ${dec}°! 🚀`, "good");
+}
+function showMapTab(which) {
+  const v = which === "viewer";
+  $("mapViewer").style.display = v ? "block" : "none";
+  $("mapFinder").style.display = v ? "none" : "block";
+  $("tabViewer").classList.toggle("on", v);
+  $("tabFinder").classList.toggle("on", !v);
+}
+
 /* ---- Cine: fotogramas, Play, Parpadeo ---- */
 function stopCine() {
   if (playTimer) { clearInterval(playTimer); playTimer = null; }
@@ -289,7 +323,12 @@ $("healthBtn").addEventListener("click", async () => {
 });
 document.querySelectorAll("[data-ra]").forEach((b) => b.addEventListener("click", () => {
   $("name").value = b.dataset.name; $("ra").value = b.dataset.ra; $("dec").value = b.dataset.dec;
+  $("mapRa").value = b.dataset.ra; $("mapDec").value = b.dataset.dec;
+  showFunFact(b.dataset.name);
 }));
+$("mapBtn").addEventListener("click", goToMap);
+$("tabViewer").addEventListener("click", () => showMapTab("viewer"));
+$("tabFinder").addEventListener("click", () => showMapTab("finder"));
 
 /* ---- Inicio ---- */
 $("status").textContent = "● API CONFIGURADA";
