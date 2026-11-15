@@ -22,7 +22,6 @@
     <a href="#cine">Cine del cielo</a>
     <a href="#spherex">Visor SPHEREx · IRSA</a>
     <a href="#mapa">Mapa del cielo · IRSA</a>
-    <a href="#resultados">Archivo</a>
     <a href="#guia">Guía</a>
   </nav>
 </header>
@@ -123,7 +122,7 @@
       <section class="card" id="cine">
         <div class="sect-num">02 / LÍNEA DE TIEMPO</div>
         <h3>Cine del cielo — Play y Parpadeo</h3>
-        <p class="small">Cada fotograma es una fecha distinta devuelta por IRSA para este centro. <strong>Play</strong> recorre las fechas en orden. <strong>Parpadeo</strong> alterna entre la primera y la última época: un objeto en movimiento parecerá saltar; uno variable parecerá encenderse y apagarse. Es comparación visual, no una resta de píxeles calculada en el servidor.</p>
+        <p class="small">Cada fotograma es una fecha distinta devuelta por IRSA para este centro. <strong>Play</strong> recorre las fechas en orden. <strong>Parpadeo</strong> alterna entre la primera y la última época: un objeto en movimiento parecerá saltar; uno variable parecerá encenderse y apagarse. Es comparación visual, no una resta de píxeles calculada en el servidor. Pulsa un fotograma para ver su información y cargar su FITS. RA / DEC de IRSA es el centro de cada exposición (s_ra / s_dec), no la posición exacta de una fuente: cada exposición cubre unos 3.5° de cielo.</p>
         <div class="controls">
           <button class="btn" id="playBtn" disabled>▶ Play</button>
           <button class="btn" id="pauseBtn" disabled>⏸ Pausa</button>
@@ -175,19 +174,8 @@
         <p class="small" id="mapNote">Mapa actual: IRSA Viewer, todo el cielo. Introduce unas coordenadas para viajar a una región.</p>
       </section>
 
-      <section class="card" id="resultados">
-        <div class="sect-num">05 / ARCHIVO</div>
-        <h3>Resultados de archivo</h3>
-        <p><button class="btn" id="csvBtn" disabled>↓ Exportar CSV</button></p>
-        <div class="tablewrap"><table>
-          <thead><tr><th>Observación</th><th>Objeto</th><th>Colección</th><th>Banda</th><th>Fecha</th><th>Centro de exposición RA / DEC</th><th></th></tr></thead>
-          <tbody id="rows"><tr><td colspan="7" style="text-align:center;color:#94a7c2;padding:28px">Configura una búsqueda para consultar el archivo SPHEREx.</td></tr></tbody>
-        </table></div>
-        <p class="small" id="note">RA / DEC de la tabla es el centro de cada exposición SPHEREx (s_ra / s_dec de IRSA), no la posición exacta de una fuente en el punto consultado. Cada exposición cubre unos 3.5° de cielo.</p>
-      </section>
-
       <section class="card" id="visor">
-        <div class="sect-num">06 / VISOR FITS</div>
+        <div class="sect-num">05 / VISOR FITS</div>
         <h3>Visor de imágenes FITS</h3>
         <p>
           <button class="btn" id="cutoutBtn" disabled>Crear recorte</button>
@@ -198,13 +186,13 @@
       </section>
 
       <section class="card">
-        <div class="sect-num">07 / PRODUCTO SELECCIONADO</div>
+        <div class="sect-num">06 / PRODUCTO SELECCIONADO</div>
         <h3>Información del producto</h3>
         <div id="details" class="notice">Aún no hay una observación seleccionada.</div>
       </section>
 
       <section class="card" id="irsa">
-        <div class="sect-num">08 / ARCHIVO EN VIVO</div>
+        <div class="sect-num">07 / ARCHIVO EN VIVO</div>
         <h3>IRSA en vivo — documentación del archivo</h3>
         <p class="small">Documentación oficial de SPHEREx en IRSA, incrustada en esta página. Todos los datos mostrados proceden únicamente de IRSA.</p>
         <p>
@@ -216,7 +204,7 @@
       </section>
 
       <section class="card" id="guia">
-        <div class="sect-num">09 / GUÍA Y OBJETIVOS</div>
+        <div class="sect-num">08 / GUÍA Y OBJETIVOS</div>
         <h3>Guía de observación</h3>
         <div class="cards">
           <div class="info"><h4>01 · Busca movimiento</h4><p>Compara la misma zona en dos fechas. Un asteroide se desplaza entre épocas; una estrella cercana avanza poco a poco; una variable cambia de brillo. Anota fecha, obs_id y banda antes de concluir nada.</p></div>
@@ -224,7 +212,7 @@
           <div class="info"><h4>03 · Objetos de prueba</h4><p class="mono">Barnard · 269.452077, +4.693365<br>Epsilon Indi B · 331.044146, −56.782844<br>WISE 0855 · 133.795125, −7.245147<br>RW Aur · 76.956526, +30.401438<br>R Dra · 248.167625, +66.754972</p><p style="margin-top:8px">Empieza por Barnard y WISE 0855, los de mayor movimiento propio.</p></div>
           <div class="info"><h4>04 · Lee los metadatos</h4><p><span class="mono">t_min</span> es la fecha de la exposición, aquí en calendario con su MJD original. <span class="mono">s_ra / s_dec</span> es el centro de la exposición. <span class="mono">em_min / em_max</span> es el rango de longitud de onda de la banda.</p></div>
           <div class="info"><h4>05 · Límites honestos</h4><p>SPHEREx revisita cada zona cada ~6 meses; la línea de tiempo depende de lo publicado en IRSA. Con radios grandes IRSA puede tardar o fallar. Un movimiento menor que un píxel (6.15″) no se verá saltar entre dos épocas.</p></div>
-          <div class="info"><h4>06 · Si ves algo inusual</h4><p>Guarda el enlace con coordenadas, exporta el CSV y anota obs_id, fecha y banda. Si el punto se desplaza de forma coherente en tres o más épocas, merece una segunda revisión.</p></div>
+          <div class="info"><h4>06 · Si ves algo inusual</h4><p>Guarda el enlace con coordenadas y anota obs_id, fecha y banda. Si el punto se desplaza de forma coherente en tres o más épocas, merece una segunda revisión.</p></div>
         </div>
         <h3 style="margin-top:24px">Planet X · Research objectives</h3>
         <p class="small">Líneas de investigación para el estudio de posibles objetos astronómicos mediante observaciones infrarrojas. El Planeta X es hipotético: aquí se buscan candidatos, no se afirma su existencia.</p>

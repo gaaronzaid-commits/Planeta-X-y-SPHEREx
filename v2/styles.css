@@ -80,11 +80,6 @@ input:focus,select:focus{outline:none;border-color:var(--cyan);box-shadow:0 0 0 
 .timeline button small{display:block;color:var(--muted);font:11px "JetBrains Mono",monospace;margin-top:4px;font-weight:400}
 .timeline button.on{border-color:var(--cyan);background:rgba(103,232,249,.12)}
 .mono{font:13px "JetBrains Mono",ui-monospace,monospace;color:#c6d4e8;line-height:1.7;overflow-wrap:anywhere}
-.tablewrap{overflow:auto;border:1px solid var(--line);border-radius:12px}
-table{border-collapse:collapse;width:100%;min-width:720px;font-size:12.5px}
-th{text-align:left;color:#8fa3bf;background:#0d1729;padding:12px 11px;white-space:nowrap;font-size:11px;letter-spacing:.08em;text-transform:uppercase}
-td{padding:11px;border-top:1px solid #16263f;color:#d7e5f1}
-tr.sel td{background:rgba(103,232,249,.08)}
 .viewer{min-height:320px;background:#02040a;border:1px solid var(--line2);border-radius:14px;overflow:hidden}
 .viewer iframe{width:100%;height:500px;border:0;background:#02040a}
 .empty{min-height:300px;display:grid;place-items:center;text-align:center;padding:28px;color:var(--muted)}

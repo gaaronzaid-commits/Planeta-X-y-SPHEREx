@@ -83,8 +83,8 @@ function resetSearch() {
 }
 function loadFromURL() {
   const p = new URLSearchParams(location.search);
-  if (p.get("ra")) $("ra").value = p.get("ra");
-  if (p.get("dec")) $("dec").value = p.get("dec");
+  if (p.get("ra")) { $("ra").value = p.get("ra"); $("mapRa").value = p.get("ra"); }
+  if (p.get("dec")) { $("dec").value = p.get("dec"); $("mapDec").value = p.get("dec"); }
   if (p.get("radius")) $("radius").value = p.get("radius");
   if (p.get("name")) $("name").value = p.get("name");
   return !!(p.get("ra") && p.get("dec"));
@@ -101,7 +101,6 @@ const FUNFACTS = {
 function showFunFact(name) {
   if (FUNFACTS[name]) $("funFact").textContent = FUNFACTS[name];
 }
-function irsaViewerURL(ra, dec) { return "https://irsa.ipac.caltech.edu/irsaviewer/"; }
 function finderURL(ra, dec) {
   // Finder Chart de IRSA: mode=getResult centra el mapa en locstr="RA Dec".
   return "https://irsa.ipac.caltech.edu/applications/finderchart/servlet/api?mode=getResult&locstr=" + encodeURIComponent(ra + " " + dec);
@@ -150,12 +149,12 @@ function buildFrames() {
   });
   renderTimeline(); renderBands();
   const has = frames.length > 0;
-  $("playBtn").disabled = !has; $("blinkBtn").disabled = frames.length < 2;
+  $("playBtn").disabled = frames.length < 2; $("blinkBtn").disabled = frames.length < 2;
   $("prevBtn").disabled = !has; $("nextBtn").disabled = !has;
   $("frameCount").textContent = has
     ? `${frames.length} fotogramas · ${frames[0].date} → ${frames[frames.length - 1].date}`
     : "Sin fotogramas para esta banda y estas fechas";
-  if (has) showFrame(0, false); else $("frameInfo").textContent = "Fotograma: —";
+  if (has) showFrame(0, true); else $("frameInfo").textContent = "Fotograma: —";
 }
 function renderTimeline() {
   const tl = $("timeline"); tl.innerHTML = "";
@@ -192,8 +191,8 @@ function renderBands() {
   box.innerHTML = "<h4 style='margin:0 0 8px;font-size:13px'>Cobertura espectral real de esta búsqueda (IRSA: em_min–em_max)</h4>" +
     "<p class='small'>Cada banda es un rango de longitud de onda devuelto por IRSA. No es un espectro de flujo: la tabla SIA no devuelve flujo.</p>" +
     [...seen.entries()].sort((a, b) => a[1].lo - b[1].lo).map(([b, r]) => {
-      const left = ((r.lo - 0.7) / 4.4 * 100).toFixed(1);
-      const w = Math.max(2, (r.hi - r.lo) / 4.4 * 100).toFixed(1);
+      const left = Math.min(95, Math.max(0, (r.lo - 0.7) / 4.4 * 100)).toFixed(1);
+      const w = Math.max(2, Math.min(100 - Number(left), (r.hi - r.lo) / 4.4 * 100)).toFixed(1);
       return `<div style="font-size:12px"><strong>${esc(b)}</strong> · ${r.lo.toFixed(2)}–${r.hi.toFixed(2)} µm<div class="bandbar"><i style="left:${left}%;width:${w}%"></i></div></div>`;
     }).join("");
 }
@@ -207,6 +206,8 @@ async function search() {
     if (name && (!ra || !dec)) {
       $("state").textContent = "RESOLVIENDO";
       const c = await resolveName(name);
+      if (!Number.isFinite(Number(c.ra)) || !Number.isFinite(Number(c.dec)))
+        throw new Error("No se pudo resolver ese nombre en IRSA.");
       ra = String(c.ra); dec = String(c.dec);
       $("ra").value = ra; $("dec").value = dec;
     }
@@ -221,9 +222,8 @@ async function search() {
     $("searchBtn").disabled = true;
     $("state").textContent = "CONSULTANDO";
     live("loading", r, d, radius, 0, colls.join(", "));
-    $("rows").innerHTML = '<tr><td colspan="7" style="text-align:center;padding:28px">Consultando IRSA…</td></tr>';
     rows = []; selected = null;
-    $("csvBtn").disabled = true; $("cutoutBtn").disabled = true; $("fitsBtn").disabled = true;
+    $("cutoutBtn").disabled = true; $("fitsBtn").disabled = true;
     $("details").textContent = "Esperando resultados de IRSA…";
     const jobs = colls.map(async (collection) => {
       const res = await fetch(apiUrl("/api/sia", { collection, ra: r, dec: d, radius, maxrec }));
@@ -240,51 +240,39 @@ async function search() {
     $("total").textContent = rows.length;
     $("ncol").textContent = done.filter((x) => x.status === "fulfilled").length;
     $("state").textContent = errors.length ? "PARCIAL" : "COMPLETADA";
-    $("csvBtn").disabled = rows.length === 0;
-    renderRows(); buildFrames(); live(errors.length ? "error" : "ok", r, d, radius, rows.length, colls.join(", "));
+    buildFrames(); live(errors.length ? "error" : "ok", r, d, radius, rows.length, colls.join(", "));
     shareURL();
     if (errors.length) msg("Algunas colecciones no respondieron: " + errors.join(" | ") + ". Si el radio es grande, prueba 0.05° o 0.03°.", "error");
     else if (rows.length) msg(`Consulta completada. Se recibieron ${rows.length} registros de IRSA. El Cine tiene ${frames.length} fotogramas.`, "good");
     else msg("IRSA respondió, pero no devolvió observaciones para estas coordenadas, radio y colecciones.", "");
-    $("note").textContent = `Centro consultado: RA ${r}°, DEC ${d}° · Radio ${radius}° · Respuesta en tiempo real desde IRSA. RA / DEC de la tabla es el centro de cada exposición (s_ra / s_dec).`;
   } catch (e) {
-    $("state").textContent = "ERROR"; live("error", ra, dec, $("radius").value, 0, "");
-    $("rows").innerHTML = '<tr><td colspan="7" style="text-align:center;padding:25px">No fue posible completar la consulta.</td></tr>';
+    $("state").textContent = "ERROR"; $("total").textContent = "—"; $("ncol").textContent = "—";
+    live("error", ra, dec, $("radius").value, 0, "");
     msg(e.message, "error");
   } finally { $("searchBtn").disabled = false; }
-}
-function renderRows() {
-  const body = $("rows");
-  if (!rows.length) { body.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:28px;color:#93a9c0">No se encontraron registros.</td></tr>'; return; }
-  body.innerHTML = rows.map((o, i) => `<tr data-i="${i}">
-    <td class="mono">${esc(val(o, "obs_id", "obs_publisher_did"))}</td>
-    <td>${esc(val(o, "target_name", "target"))}</td>
-    <td>${esc(o._collection)}</td>
-    <td>${esc(val(o, "energy_bandpassname"))}</td>
-    <td class="mono">${esc(fmtMJD(val(o, "t_min")))}</td>
-    <td class="mono">${esc(val(o, "s_ra"))} / ${esc(val(o, "s_dec"))}</td>
-    <td><button class="btn" data-view="${i}">Abrir</button></td></tr>`).join("");
-  body.querySelectorAll("[data-view]").forEach((b) => b.addEventListener("click", () => selectRow(Number(b.dataset.view))));
 }
 function selectRow(i) {
   const o = rows[i]; if (!o) return;
   selected = o;
-  document.querySelectorAll("#rows tr").forEach((tr) => tr.classList.remove("sel"));
-  const tr = document.querySelector(`#rows tr[data-i="${i}"]`);
-  if (tr) tr.classList.add("sel");
   const access = val(o, "access_url");
+  const lo = Number(val(o, "em_min")) * 1e6, hi = Number(val(o, "em_max")) * 1e6;
+  const wave = (Number.isFinite(lo) && Number.isFinite(hi))
+    ? `${lo.toFixed(2)} – ${hi.toFixed(2)} µm`
+    : `${esc(val(o, "em_min"))} – ${esc(val(o, "em_max"))} m`;
   $("details").innerHTML = `
     <div><strong>Identificador:</strong> ${esc(val(o, "obs_id", "obs_publisher_did"))}</div>
     <div><strong>Colección:</strong> ${esc(o._collection)}</div>
     <div><strong>Objeto:</strong> ${esc(val(o, "target_name", "target"))}</div>
     <div><strong>Banda:</strong> ${esc(val(o, "energy_bandpassname"))}</div>
-    <div><strong>Longitud de onda:</strong> ${esc(val(o, "em_min"))} – ${esc(val(o, "em_max"))} m</div>
+    <div><strong>Longitud de onda:</strong> ${wave}</div>
     <div><strong>Tiempo:</strong> ${esc(fmtMJD(val(o, "t_min")))}</div>
     <div><strong>Calibración:</strong> ${esc(val(o, "calib_level"))}</div>
     <div style="overflow-wrap:anywhere"><strong>URL del producto:</strong><br>${esc(access)}</div>`;
   $("fitsBtn").disabled = !access || access === "—";
   $("cutoutBtn").disabled = !access || access === "—";
-  $("viewer").innerHTML = '<div class="empty"><div><div style="font-size:40px">✦</div><strong>Observación seleccionada</strong><p>Pulsa “Abrir FITS” para cargarla en el visor.</p></div></div>';
+  if (!$("viewer").querySelector("iframe")) {
+    $("viewer").innerHTML = '<div class="empty"><div><div style="font-size:40px">✦</div><strong>Observación seleccionada</strong><p>Pulsa “Abrir FITS” para cargarla en el visor.</p></div></div>';
+  }
   $("viewerInfo").textContent = "Producto seleccionado: " + val(o, "obs_id", "obs_publisher_did");
 }
 function showJS9(cutout) {
@@ -297,27 +285,15 @@ function showJS9(cutout) {
   $("viewer").innerHTML = `<iframe title="Visor JS9" allowfullscreen src="https://js9.si.edu/js9/js9.html?url=${encodeURIComponent(fileURL)}"></iframe>`;
   $("viewerInfo").textContent = cutout ? "Recorte FITS solicitado a IRSA. La carga depende del archivo y de JS9." : "Cargando el FITS en JS9. Los productos pueden ser grandes y tardar.";
 }
-function exportCSV() {
-  if (!rows.length) return;
-  const headers = [...new Set(rows.flatMap((o) => Object.keys(o)))];
-  const q = (v) => '"' + String(v ?? "").replace(/"/g, '""') + '"';
-  const csv = [headers.map(q).join(","), ...rows.map((o) => headers.map((h) => q(o[h] ?? "")).join(","))].join("\r\n");
-  const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a"); a.href = url; a.download = "spherex_irsa_results.csv"; a.click();
-  URL.revokeObjectURL(url);
-}
-
 /* ---- Eventos ---- */
 $("searchBtn").addEventListener("click", search);
 $("spherexSearchBtn").addEventListener("click", search);
 $("spherexOpenBtn").addEventListener("click", () => {
   const ra = $("ra").value.trim(), dec = $("dec").value.trim(), radius = $("radius").value;
-  if (!ra || !dec) { msg("Escribe RA y DEC para abrir IRSA. 🔭", ""); return; }
+  if (!ra || !dec) { msg("Escribe RA y DEC para abrir IRSA.", ""); return; }
   window.open(spherexAppURL(ra, dec, radius), "_blank", "noopener");
 });
 $("resetBtn").addEventListener("click", resetSearch);
-$("csvBtn").addEventListener("click", exportCSV);
 $("fitsBtn").addEventListener("click", () => showJS9(false));
 $("cutoutBtn").addEventListener("click", () => showJS9(true));
 $("playBtn").addEventListener("click", () => {
