@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=8">
+<link rel="stylesheet" href="styles.css?v=9">
 </head>
 <body>
 <canvas id="stars" aria-hidden="true"></canvas>
@@ -86,6 +86,21 @@
         <div id="live" class="notice">Sin consulta todavía. Pulsa “Consultar IRSA” y te diremos en qué fechas SPHEREx fotografió esta zona del cielo. Los datos llegan en tiempo real desde IRSA; no hay nada precargado.</div>
         <div class="epochs" id="epochs"></div>
         <p class="small" id="liveMeta">Fuente: NASA/IPAC IRSA · SPHEREx · Última consulta: —</p>
+      </section>
+
+      <section class="card" id="imgCard" style="display:none">
+        <div class="sect-num">IMÁGENES POR FECHA</div>
+        <h3>Las fotos de cada fecha, una a una</h3>
+        <p class="small">Cada fecha es una foto real de SPHEREx de esta zona, tomada de IRSA. Pulsa una fecha para ver su imagen en el visor. Son recortes centrados en el punto que buscas, para que puedas compararlas y ver qué se ha movido entre una fecha y otra.</p>
+        <div class="epochs" id="imgDates"></div>
+        <p class="small" id="imgSpan"></p>
+        <div class="controls">
+          <button class="btn" id="imgPrev">← Fecha anterior</button>
+          <button class="btn" id="imgNext">Fecha siguiente →</button>
+          <button class="btn" id="imgBlink">Parpadear 1ª ↔ última</button>
+        </div>
+        <div class="iframe-container" id="imgViewer"><div class="empty">Pulsa una fecha para ver su imagen.</div></div>
+        <p class="small" id="imgInfo">Las imágenes son archivos FITS reales de IRSA y se muestran con JS9; pueden tardar un poco en cargar.</p>
       </section>
 
       <section class="card" id="spherex">
@@ -223,6 +238,6 @@
   addEventListener("resize",size); size(); requestAnimationFrame(draw);
 })();
 </script>
-<script src="app.js?v=8"></script>
+<script src="app.js?v=9"></script>
 </body>
 </html>

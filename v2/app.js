@@ -8,6 +8,10 @@ const MAXREC = 25;
 
 const $ = (id) => document.getElementById(id);
 let rows = []; // registros SIA devueltos por IRSA (solo se usan sus fechas)
+let epochList = []; // una entrada por fecha con imagen: {date, label, row}
+let epochIdx = 0;
+let imgTimer = null;
+let currentRa = "", currentDec = "";
 
 const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const val = (o, ...keys) => { for (const k of keys) if (o[k] !== undefined && o[k] !== null && o[k] !== "") return o[k]; return "—"; };
@@ -141,8 +145,21 @@ function showMapTab(which) {
 /* ---- Fechas en palabras sencillas ---- */
 function renderEpochs() {
   const box = $("epochs");
-  const dates = [...new Set(rows.map((o) => { const d = mjdDate(val(o, "t_min")); return d ? d.toISOString().slice(0, 10) : null; }).filter(Boolean))].sort();
-  if (!dates.length) { box.innerHTML = ""; return; }
+  const byDate = new Map();
+  rows.forEach((o) => {
+    const d = mjdDate(val(o, "t_min"));
+    if (!d) return;
+    const key = d.toISOString().slice(0, 10);
+    if (!byDate.has(key)) byDate.set(key, []);
+    byDate.get(key).push(o);
+  });
+  const dates = [...byDate.keys()].sort();
+  epochList = dates.map((key) => {
+    const label = fmtFecha(new Date(key + "T00:00:00Z"));
+    const row = byDate.get(key).find((o) => val(o, "access_url") && val(o, "access_url") !== "—") || null;
+    return { date: key, label, row };
+  }).filter((e) => e.row);
+  if (!dates.length) { box.innerHTML = ""; $("imgCard").style.display = "none"; stopImgBlink(); return; }
   const first = fmtFecha(new Date(dates[0] + "T00:00:00Z"));
   const last = fmtFecha(new Date(dates[dates.length - 1] + "T00:00:00Z"));
   $("live").textContent = dates.length === 1
@@ -150,6 +167,41 @@ function renderEpochs() {
     : `SPHEREx fotografió esta zona en ${dates.length} fechas distintas, entre el ${first} y el ${last}.`;
   $("live").className = "notice good";
   box.innerHTML = dates.map((d) => `<span class="epoch">${esc(fmtFecha(new Date(d + "T00:00:00Z")))}</span>`).join("");
+  // Imágenes por fecha: una foto real por fecha, para comparar el cambio.
+  if (epochList.length) {
+    const spanDays = Math.round((new Date(dates[dates.length - 1] + "T00:00:00Z") - new Date(dates[0] + "T00:00:00Z")) / 86400000);
+    $("imgSpan").textContent = epochList.length === 1
+      ? "Solo hay una fecha con imagen para esta zona."
+      : `Entre la primera y la última foto hay ${spanDays} días. Parpadea entre ellas y fíjate en lo que cambia de sitio: eso es lo que se mueve.`;
+    $("imgDates").innerHTML = epochList.map((e, i) => `<button class="epoch" data-i="${i}">${esc(e.label)}</button>`).join("");
+    $("imgCard").style.display = "block";
+    showEpochImage(0);
+  } else {
+    $("imgCard").style.display = "none";
+  }
+}
+
+/* ---- Imagen de cada fecha (recorte FITS real de IRSA, visto con JS9) ---- */
+function stopImgBlink() {
+  if (imgTimer) { clearInterval(imgTimer); imgTimer = null; }
+  const b = $("imgBlink");
+  if (b) { b.classList.remove("on"); b.textContent = "Parpadear 1ª ↔ última"; }
+}
+function loadEpochImage(i) {
+  epochIdx = Math.max(0, Math.min(epochList.length - 1, i));
+  const e = epochList[epochIdx];
+  document.querySelectorAll("#imgDates .epoch").forEach((c) => c.classList.toggle("on", Number(c.dataset.i) === epochIdx));
+  const access = val(e.row, "access_url");
+  const cutoutURL = apiUrl("/api/cutout", { url: access, center: currentRa + "," + currentDec, size: "0.25" });
+  $("imgViewer").innerHTML = `<iframe title="Imagen SPHEREx del ${esc(e.label)}" allowfullscreen src="https://js9.si.edu/js9/js9.html?url=${encodeURIComponent(cutoutURL)}"></iframe>`;
+  const band = val(e.row, "energy_bandpassname");
+  const obs = val(e.row, "obs_id", "obs_publisher_did");
+  $("imgInfo").textContent = `Imagen del ${e.label} · Banda ${band} · Observación ${obs} · Recorte de 0,25° centrado en tu punto. Si tarda en cargar, espera: los archivos FITS son grandes.`;
+}
+function showEpochImage(i) {
+  if (!epochList.length) return;
+  stopImgBlink();
+  loadEpochImage(i);
 }
 
 /* ---- Búsqueda IRSA ---- */
@@ -168,6 +220,8 @@ async function fetchSIA(collection, r, d, radius) {
 }
 async function search() {
   $("msg").style.display = "none";
+  stopImgBlink();
+  $("imgCard").style.display = "none";
   const name = $("name").value.trim();
   let ra = $("ra").value.trim(), dec = $("dec").value.trim();
   try {
@@ -183,6 +237,7 @@ async function search() {
     if (!Number.isFinite(r) || !Number.isFinite(d) || r < 0 || r >= 360 || d < -90 || d > 90)
       throw new Error("Coordenadas no válidas. RA 0–360, DEC −90 a 90.");
     const radius = $("radius").value;
+    currentRa = ra; currentDec = dec;
     $("searchBtn").disabled = true;
     updateSpherexFrame(r, d, radius);
     goToMap(true); // "Consultar IRSA" también centra el mapa, como el botón "Ver en el mapa"
@@ -242,6 +297,21 @@ document.querySelectorAll("[data-ra]").forEach((b) => b.addEventListener("click"
 }));
 $("tabViewer").addEventListener("click", () => showMapTab("viewer"));
 $("tabFinder").addEventListener("click", () => showMapTab("finder"));
+$("imgPrev").addEventListener("click", () => showEpochImage(epochIdx - 1));
+$("imgNext").addEventListener("click", () => showEpochImage(epochIdx + 1));
+$("imgDates").addEventListener("click", (ev) => {
+  const c = ev.target.closest("[data-i]");
+  if (c) showEpochImage(Number(c.dataset.i));
+});
+$("imgBlink").addEventListener("click", () => {
+  if (epochList.length < 2) return;
+  if (imgTimer) { stopImgBlink(); return; }
+  const b = $("imgBlink");
+  b.classList.add("on"); b.textContent = "Parpadeo activado · pulsa para parar";
+  let last = false;
+  loadEpochImage(0);
+  imgTimer = setInterval(() => { last = !last; loadEpochImage(last ? epochList.length - 1 : 0); }, 1200);
+});
 
 /* ---- Inicio ---- */
 window.addEventListener("error", (e) => {
