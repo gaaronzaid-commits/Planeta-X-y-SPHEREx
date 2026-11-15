@@ -1411,6 +1411,17 @@ window.CONFIG = {
       document.querySelectorAll("[data-mpanel]").forEach(function(p){ p.hidden = p.getAttribute("data-mpanel")!==key; });
     });
   });
+  /* El botón "Finder Chart" además de mostrar el mapa lo vuelve a centrar
+     en el punto que está en el formulario (el último punto buscado). */
+  var finderTab=document.querySelector("[data-mtab='finder']");
+  if(finderTab) finderTab.addEventListener("click", function(){
+    var ra=parseCoord($("raInput").value, true), dec=parseCoord($("decInput").value, false);
+    if(isNaN(ra)||isNaN(dec)||dec<-90||dec>90) return;
+    ra=((ra%360)+360)%360;
+    var name=$("coordName") ? $("coordName").value.trim() : "";
+    setFinderFrame(ra, dec, name);
+    toast("Finder Chart centrado en RA "+ra.toFixed(4)+"°, Dec "+dec.toFixed(4)+"°.");
+  });
   var centerBtn=$("centerMapBtn");
   if(centerBtn) centerBtn.addEventListener("click", function(){
     var ra=parseCoord($("raInput").value, true), dec=parseCoord($("decInput").value, false);
