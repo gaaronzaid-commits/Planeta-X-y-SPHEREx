@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=9">
+<link rel="stylesheet" href="styles.css?v=10">
 </head>
 <body>
 <canvas id="stars" aria-hidden="true"></canvas>
@@ -99,8 +99,8 @@
           <button class="btn" id="imgNext">Fecha siguiente →</button>
           <button class="btn" id="imgBlink">Parpadear 1ª ↔ última</button>
         </div>
-        <div class="iframe-container" id="imgViewer"><div class="empty">Pulsa una fecha para ver su imagen.</div></div>
-        <p class="small" id="imgInfo">Las imágenes son archivos FITS reales de IRSA y se muestran con JS9; pueden tardar un poco en cargar.</p>
+        <div class="imgwrap" id="imgViewer"><canvas id="imgCanvas" style="display:none"></canvas><div class="empty" id="imgEmpty">Pulsa una fecha para ver su imagen.</div></div>
+        <p class="small" id="imgInfo">Las imágenes son archivos FITS reales de IRSA; esta página las dibuja directamente, sin depender de otros visores.</p>
       </section>
 
       <section class="card" id="spherex">
@@ -238,6 +238,6 @@
   addEventListener("resize",size); size(); requestAnimationFrame(draw);
 })();
 </script>
-<script src="app.js?v=9"></script>
+<script src="app.js?v=10"></script>
 </body>
 </html>

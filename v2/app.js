@@ -12,6 +12,9 @@ let epochList = []; // una entrada por fecha con imagen: {date, label, row}
 let epochIdx = 0;
 let imgTimer = null;
 let currentRa = "", currentDec = "";
+const imgCache = new Map(); // época -> ImageData ya dibujada
+const imgPending = new Set(); // épocas cuya imagen se está descargando
+let searchGen = 0; // crece con cada búsqueda; descarta cargas viejas
 
 const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const val = (o, ...keys) => { for (const k of keys) if (o[k] !== undefined && o[k] !== null && o[k] !== "") return o[k]; return "—"; };
@@ -181,22 +184,167 @@ function renderEpochs() {
   }
 }
 
-/* ---- Imagen de cada fecha (recorte FITS real de IRSA, visto con JS9) ---- */
+/* ---- Imagen de cada fecha: recorte FITS real de IRSA, dibujado aquí mismo ---- */
 function stopImgBlink() {
   if (imgTimer) { clearInterval(imgTimer); imgTimer = null; }
   const b = $("imgBlink");
   if (b) { b.classList.remove("on"); b.textContent = "Parpadear 1ª ↔ última"; }
 }
-function loadEpochImage(i) {
-  epochIdx = Math.max(0, Math.min(epochList.length - 1, i));
-  const e = epochList[epochIdx];
-  document.querySelectorAll("#imgDates .epoch").forEach((c) => c.classList.toggle("on", Number(c.dataset.i) === epochIdx));
-  const access = val(e.row, "access_url");
-  const cutoutURL = apiUrl("/api/cutout", { url: access, center: currentRa + "," + currentDec, size: "0.25" });
-  $("imgViewer").innerHTML = `<iframe title="Imagen SPHEREx del ${esc(e.label)}" allowfullscreen src="https://js9.si.edu/js9/js9.html?url=${encodeURIComponent(cutoutURL)}"></iframe>`;
+/* Lee un FITS (también multi-extensión) y devuelve la primera imagen 2D. */
+function parseFITS(buf) {
+  const view = new DataView(buf);
+  const dec = new TextDecoder("utf-8");
+  let offset = 0;
+  const readValue = (raw) => {
+    let v = raw.trim(), inQ = false, cut = -1;
+    for (let i = 0; i < v.length; i++) {
+      if (v[i] === "'") inQ = !inQ;
+      else if (v[i] === "/" && !inQ) { cut = i; break; }
+    }
+    if (cut >= 0) v = v.slice(0, cut).trim();
+    if (v.startsWith("'")) {
+      const end = v.indexOf("'", 1);
+      return end > 0 ? v.slice(1, end).trim() : v.slice(1).trim();
+    }
+    if (v === "T") return true;
+    if (v === "F") return false;
+    const n = Number(v);
+    return v !== "" && Number.isFinite(n) ? n : v;
+  };
+  while (offset + 2880 <= buf.byteLength) {
+    const header = {};
+    let endFound = false;
+    while (offset + 2880 <= buf.byteLength) {
+      const block = dec.decode(new Uint8Array(buf, offset, 2880));
+      offset += 2880;
+      for (let i = 0; i < 2880; i += 80) {
+        const card = block.slice(i, i + 80);
+        if (card.slice(0, 3) === "END" && card.slice(3).trim() === "") { endFound = true; break; }
+        if (card.startsWith("COMMENT") || card.startsWith("HISTORY")) continue;
+        const eq = card.indexOf("=");
+        if (eq > 0) header[card.slice(0, eq).trim()] = readValue(card.slice(eq + 1));
+      }
+      if (endFound) break;
+    }
+    if (!endFound) return null;
+    const naxis = Number(header.NAXIS) || 0;
+    const bitpix = Number(header.BITPIX) || 8;
+    const bytesPer = Math.abs(bitpix) / 8;
+    let count = 1;
+    for (let a = 1; a <= naxis; a++) count *= Number(header["NAXIS" + a]) || 0;
+    const dataBytes = Math.ceil((count * bytesPer) / 2880) * 2880;
+    const isImage = (header.SIMPLE === true || String(header.XTENSION || "").trim() === "IMAGE") && naxis >= 2;
+    if (isImage && count > 0) {
+      const w = Number(header.NAXIS1), h = Number(header.NAXIS2);
+      const depth = naxis >= 3 ? Number(header.NAXIS3) || 1 : 1;
+      const plane = Math.floor(depth / 2);
+      const bscale = Number(header.BSCALE ?? 1) || 1;
+      const bzero = Number(header.BZERO ?? 0) || 0;
+      const total = w * h;
+      const data = new Float32Array(total);
+      const base = offset + plane * total * bytesPer;
+      for (let k = 0; k < total; k++) {
+        const o = base + k * bytesPer;
+        let raw;
+        if (bitpix === 8) raw = view.getUint8(o);
+        else if (bitpix === 16) raw = view.getInt16(o, false);
+        else if (bitpix === 32) raw = view.getInt32(o, false);
+        else if (bitpix === 64) raw = Number(view.getBigInt64(o, false));
+        else if (bitpix === -32) raw = view.getFloat32(o, false);
+        else if (bitpix === -64) raw = view.getFloat64(o, false);
+        else return null;
+        data[k] = raw * bscale + bzero;
+      }
+      return { width: w, height: h, data };
+    }
+    offset += dataBytes;
+  }
+  return null;
+}
+/* Convierte los píxeles FITS a imagen visible (recorte por percentiles + raíz). */
+function renderFITS(img) {
+  const { width, height, data } = img;
+  const total = width * height;
+  const step = Math.max(1, Math.floor(total / 20000));
+  const sample = [];
+  for (let k = 0; k < total; k += step) {
+    const v = data[k];
+    if (Number.isFinite(v)) sample.push(v);
+  }
+  sample.sort((a, b) => a - b);
+  const pct = (p) => (sample.length ? sample[Math.min(sample.length - 1, Math.floor(p * sample.length))] : 0);
+  let lo = pct(0.01), hi = pct(0.995);
+  if (!(hi > lo)) { lo = sample[0] ?? 0; hi = sample[sample.length - 1] ?? 1; if (!(hi > lo)) hi = lo + 1; }
+  const out = new ImageData(width, height);
+  const px = out.data;
+  for (let y = 0; y < height; y++) {
+    const srcRow = (height - 1 - y) * width; // en FITS la primera fila es la de abajo
+    for (let x = 0; x < width; x++) {
+      let v = data[srcRow + x];
+      if (!Number.isFinite(v)) v = lo;
+      let t = (v - lo) / (hi - lo);
+      t = t < 0 ? 0 : t > 1 ? 1 : t;
+      const g = Math.round(Math.sqrt(t) * 255);
+      const o = (y * width + x) * 4;
+      px[o] = g; px[o + 1] = g; px[o + 2] = g; px[o + 3] = 255;
+    }
+  }
+  return out;
+}
+function drawEpochImage(imageData) {
+  const canvas = $("imgCanvas"), empty = $("imgEmpty");
+  canvas.width = imageData.width;
+  canvas.height = imageData.height;
+  canvas.getContext("2d").putImageData(imageData, 0, 0);
+  canvas.style.display = "block";
+  empty.style.display = "none";
+}
+async function loadEpochImage(i) {
+  if (!epochList.length) return;
+  const idx = Math.max(0, Math.min(epochList.length - 1, i));
+  epochIdx = idx;
+  const gen = searchGen;
+  const e = epochList[idx];
+  document.querySelectorAll("#imgDates .epoch").forEach((c) => c.classList.toggle("on", Number(c.dataset.i) === idx));
   const band = val(e.row, "energy_bandpassname");
   const obs = val(e.row, "obs_id", "obs_publisher_did");
-  $("imgInfo").textContent = `Imagen del ${e.label} · Banda ${band} · Observación ${obs} · Recorte de 0,25° centrado en tu punto. Si tarda en cargar, espera: los archivos FITS son grandes.`;
+  const base = `Imagen del ${e.label} · Banda ${band} · Observación ${obs} · Recorte de 0,25° centrado en tu punto.`;
+  if (imgCache.has(idx)) {
+    drawEpochImage(imgCache.get(idx));
+    $("imgInfo").textContent = base;
+    return;
+  }
+  if (imgPending.has(idx)) return;
+  imgPending.add(idx);
+  $("imgInfo").textContent = base + " Cargando la imagen…";
+  try {
+    const access = val(e.row, "access_url");
+    const cutoutURL = apiUrl("/api/cutout", { url: access, center: currentRa + "," + currentDec, size: "0.25" });
+    const ctl = new AbortController();
+    const t = setTimeout(() => ctl.abort(), 60000);
+    let res;
+    try { res = await fetch(cutoutURL, { signal: ctl.signal }); }
+    finally { clearTimeout(t); }
+    if (!res.ok) throw new Error("IRSA no devolvió el recorte (HTTP " + res.status + ").");
+    const buf = await res.arrayBuffer();
+    if (gen !== searchGen) return;
+    const img = parseFITS(buf);
+    if (!img) throw new Error("No se pudo leer la imagen FITS de IRSA.");
+    const imageData = renderFITS(img);
+    imgCache.set(idx, imageData);
+    if (gen === searchGen && epochIdx === idx) {
+      drawEpochImage(imageData);
+      $("imgInfo").textContent = base;
+    }
+  } catch (err) {
+    if (gen === searchGen && epochIdx === idx) {
+      $("imgCanvas").style.display = "none";
+      const empty = $("imgEmpty");
+      empty.style.display = "block";
+      empty.textContent = "No se pudo cargar la imagen del " + e.label + ": " + (err.name === "AbortError" ? "IRSA tardó demasiado en responder (60 s)." : err.message) + " Pulsa la fecha otra vez para reintentarlo.";
+      $("imgInfo").textContent = base;
+    }
+  } finally { imgPending.delete(idx); }
 }
 function showEpochImage(i) {
   if (!epochList.length) return;
@@ -222,6 +370,9 @@ async function search() {
   $("msg").style.display = "none";
   stopImgBlink();
   $("imgCard").style.display = "none";
+  searchGen++;
+  imgCache.clear();
+  imgPending.clear();
   const name = $("name").value.trim();
   let ra = $("ra").value.trim(), dec = $("dec").value.trim();
   try {
