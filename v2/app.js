@@ -65,10 +65,24 @@ function spherexAppURL(ra, dec, radius) {
   const p = new URLSearchParams({ api: "spectral-images", ra: ra, dec: dec, sr: radius + "d" });
   return SPHEREX_APP + "?" + p.toString();
 }
+/* Cambia el src de un iframe, forzando la recarga aunque la URL sea la misma
+   (asignar la misma URL no recarga el iframe en la mayoría de navegadores,
+   así que buscar dos veces el mismo punto dejaba el visor viejo). */
+function setFrameSrc(frame, url) {
+  if (frame.src === url) {
+    frame.src = "about:blank";
+    setTimeout(() => { frame.src = url; }, 60);
+  } else {
+    frame.src = url;
+  }
+}
 function updateSpherexFrame(ra, dec, radius) {
   const url = spherexAppURL(ra, dec, radius);
-  $("spherexViewer").src = url;
-  $("coordinates").textContent = "RA: " + ra + " | DEC: " + dec;
+  setFrameSrc($("spherexViewer"), url);
+  const nm = $("name").value.trim();
+  $("coordinates").textContent = nm
+    ? `Punto analizado: ${nm} · RA ${ra}° · DEC ${dec}°`
+    : `Punto analizado: RA ${ra}° · DEC ${dec}°`;
   return url;
 }
 function resetSearch() {
@@ -102,15 +116,21 @@ function finderURL(ra, dec) {
   // Finder Chart de IRSA: mode=getResult centra el mapa en locstr="RA Dec".
   return "https://irsa.ipac.caltech.edu/applications/finderchart/servlet/api?mode=getResult&locstr=" + encodeURIComponent(ra + " " + dec);
 }
-function goToMap() {
+function goToMap(quiet = false) {
   const ra = $("mapRa").value.trim() || $("ra").value.trim();
   const dec = $("mapDec").value.trim() || $("dec").value.trim();
-  if (!ra || !dec) { msg("Escribe RA y DEC para centrar el mapa.", ""); return; }
+  if (!ra || !dec) { if (!quiet) msg("Escribe RA y DEC para centrar el mapa.", ""); return false; }
+  const r = Number(ra), d = Number(dec);
+  if (!Number.isFinite(r) || !Number.isFinite(d) || r < 0 || r >= 360 || d < -90 || d > 90) {
+    if (!quiet) msg("Las coordenadas del mapa no son válidas. RA debe estar entre 0 y 360, DEC entre −90 y 90.", "error");
+    return false;
+  }
   $("mapRa").value = ra; $("mapDec").value = dec;
-  $("mapFinder").src = finderURL(ra, dec);
+  setFrameSrc($("mapFinder"), finderURL(ra, dec));
   $("mapNote").textContent = `Mapa centrado en RA ${ra}°, DEC ${dec}°. Si el mapa no carga dentro de la página, ábrelo con los botones de arriba: es el mapa real de IRSA.`;
   showMapTab("finder");
-  msg(`Centrando el mapa de IRSA en RA ${ra}°, DEC ${dec}°.`, "good");
+  if (!quiet) msg(`Centrando el mapa de IRSA en RA ${ra}°, DEC ${dec}°.`, "good");
+  return true;
 }
 function showMapTab(which) {
   const v = which === "viewer";
@@ -165,8 +185,10 @@ async function search() {
     if (!Number.isFinite(r) || !Number.isFinite(d) || r < 0 || r >= 360 || d < -90 || d > 90)
       throw new Error("Coordenadas no válidas. RA 0–360, DEC −90 a 90.");
     const radius = $("radius").value;
+    $("mapRa").value = ra; $("mapDec").value = dec; // el mapa sigue a la búsqueda
+    $("searchBtn").disabled = true; $("spherexSearchBtn").disabled = true;
     updateSpherexFrame(r, d, radius);
-    $("searchBtn").disabled = true;
+    goToMap(true); // "Consultar IRSA" también centra el mapa, como el botón "Ver en el mapa"
     live("loading");
     rows = [];
     const jobs = COLLECTIONS.map((collection) => fetchSIA(collection, r, d, radius));
@@ -193,7 +215,7 @@ async function search() {
   } catch (e) {
     live("error");
     msg(e.message, "error");
-  } finally { $("searchBtn").disabled = false; }
+  } finally { $("searchBtn").disabled = false; $("spherexSearchBtn").disabled = false; }
 }
 
 /* ---- Eventos ---- */
@@ -223,7 +245,7 @@ document.querySelectorAll("[data-ra]").forEach((b) => b.addEventListener("click"
   $("mapRa").value = b.dataset.ra; $("mapDec").value = b.dataset.dec;
   showFunFact(b.dataset.name);
 }));
-$("mapBtn").addEventListener("click", goToMap);
+$("mapBtn").addEventListener("click", () => goToMap());
 $("tabViewer").addEventListener("click", () => showMapTab("viewer"));
 $("tabFinder").addEventListener("click", () => showMapTab("finder"));
 
@@ -234,3 +256,4 @@ window.addEventListener("error", (e) => {
 });
 $("status").textContent = "● API CONFIGURADA";
 if (loadFromURL()) search();
+else $("coordinates").textContent = "Punto analizado: Barnard's Star · RA 269.452077° · DEC 4.693365°";
