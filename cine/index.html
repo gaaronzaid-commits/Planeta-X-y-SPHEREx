@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SPHEREx Explorer — Cine del cielo con IRSA en vivo</title>
+<meta name="description" content="Ve cómo cambia el cielo con SPHEREx: imágenes en serie, parpadeo y línea de tiempo con datos reales de IRSA en tiempo real.">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header>
+  <div class="bar">
+    <div class="brand">✦ SPHEREx EXPLORER<small>CINE DEL CIELO · IRSA EN VIVO</small></div>
+    <div class="pill" id="status">● CONECTANDO…</div>
+  </div>
+  <nav>
+    <a href="#cine">▶ Cine / Blink</a>
+    <a href="#resultados">☰ Archivo IRSA</a>
+    <a href="#visor">◉ Visor FITS</a>
+    <a href="#irsa">⬢ IRSA en vivo</a>
+    <a href="#guia">✦ Guía</a>
+  </nav>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="kicker">Datos reales de SPHEREx · NASA/IPAC IRSA · En tiempo real</div>
+    <h1>Ve cómo se mueve el cielo.</h1>
+    <p>SPHEREx cartografía todo el cielo cada seis meses en 102 bandas del infrarrojo cercano. Asteroides, cometas, estrellas cercanas y enanas marrones se delatan porque cambian de posición entre imágenes. Escribe unas coordenadas, consulta IRSA en vivo y reproduce las épocas como un pequeño video.</p>
+    <p>Usa <strong>Play</strong> para ver la secuencia y <strong>Parpadeo</strong> para alternar entre la primera y la última época: lo que se mueva, saltará a la vista. Así se descubrió Plutón en 1930, comparando dos imágenes de fechas distintas.</p>
+  </section>
+
+  <div id="msg" class="notice"></div>
+
+  <div class="grid">
+    <aside class="card">
+      <h2>01 / Busca un pedazo de cielo</h2>
+      <label for="name">Nombre del objeto (opcional)</label>
+      <input id="name" placeholder="Ej. Barnard's Star">
+      <div class="two">
+        <div><label for="ra">RA (°)</label><input id="ra" type="number" step="any" placeholder="269.452077"></div>
+        <div><label for="dec">DEC (°)</label><input id="dec" type="number" step="any" placeholder="4.693365"></div>
+      </div>
+      <label for="radius">Campo de visión / radio de búsqueda</label>
+      <select id="radius">
+        <option value="0.01">Pequeño · 0.01° — 36″</option>
+        <option value="0.03">0.03° — 1.8′</option>
+        <option value="0.05" selected>Medio · 0.05° — 3′</option>
+        <option value="0.1">Grande · 0.10° — 6′</option>
+        <option value="0.25">Muy grande · 0.25° — 15′</option>
+        <option value="0.5">Enorme · 0.50° — 30′ (lento, puede fallar en IRSA)</option>
+      </select>
+      <p class="small">Un campo mayor ayuda a seguir objetos rápidos, pero tarda más y a veces IRSA falla. Si falla, prueba 0.05° o 0.03°. Cada exposición cubre unos 3.5° con píxeles de 6.15″.</p>
+      <label for="band">Banda del Cine</label>
+      <select id="band">
+        <option value="TODAS" selected>Todas — un fotograma por fecha</option>
+        <option value="SPHEREx-D1">D1 · ~0.75–1.1 µm</option>
+        <option value="SPHEREx-D2">D2 · ~1.1–1.65 µm</option>
+        <option value="SPHEREx-D3">D3 · ~1.65–2.4 µm</option>
+        <option value="SPHEREx-D4">D4 · ~2.4–3.8 µm</option>
+        <option value="SPHEREx-D5">D5 · ~3.8–4.4 µm</option>
+        <option value="SPHEREx-D6">D6 · ~4.4–5.0 µm</option>
+      </select>
+      <label>Colecciones IRSA</label>
+      <div class="checks" id="collections">
+        <label><input type="checkbox" value="spherex_dr1" checked> DR1 · Wide Survey</label>
+        <label><input type="checkbox" value="spherex_dr1_deep"> DR1 · Deep Survey</label>
+        <label><input type="checkbox" value="spherex_qr3" checked> QR3 · Wide Survey</label>
+        <label><input type="checkbox" value="spherex_qr3_deep"> QR3 · Deep Survey</label>
+        <label><input type="checkbox" value="spherex_dr1_cube"> DR1 · All-Sky Cube</label>
+      </div>
+      <label for="maxrec">Máximo de registros por colección</label>
+      <select id="maxrec">
+        <option value="10">10 registros</option>
+        <option value="25" selected>25 registros</option>
+        <option value="50">50 registros</option>
+        <option value="100">100 registros</option>
+      </select>
+      <button class="btn primary" id="searchBtn">⌕ CONSULTAR IRSA Y ARMAR EL CINE</button>
+      <button class="btn" id="copyBtn" style="width:100%;margin-top:8px">🔗 Copiar enlace con estas coordenadas</button>
+      <p class="small">La URL guarda RA, DEC y radio: compártela o incrústala y la página abrirá directo en ese cielo.</p>
+      <label>Objetos de prueba</label>
+      <div class="quick">
+        <button class="btn" data-name="Barnard's Star" data-ra="269.452077" data-dec="4.693365">Barnard</button>
+        <button class="btn" data-name="Epsilon Indi B" data-ra="331.044146" data-dec="-56.782844">Epsilon Indi B</button>
+        <button class="btn" data-name="WISE 0855" data-ra="133.795125" data-dec="-7.245147">WISE 0855</button>
+        <button class="btn" data-name="RW Aurigae" data-ra="76.956526" data-dec="30.401438">RW Aur</button>
+        <button class="btn" data-name="R Draconis" data-ra="248.167625" data-dec="66.754972">R Draconis</button>
+      </div>
+    </aside>
+
+    <section class="stack">
+      <div class="stats">
+        <div class="stat"><small>REGISTROS</small><strong id="total">—</strong></div>
+        <div class="stat"><small>COLECCIONES</small><strong id="ncol">—</strong></div>
+        <div class="stat"><small>ESTADO</small><strong id="state" style="font-size:15px">EN ESPERA</strong></div>
+      </div>
+
+      <section class="card">
+        <h3>Datos en vivo de IRSA</h3>
+        <div id="live" class="notice">Sin consulta todavía. Los datos se obtienen en tiempo real desde IRSA al pulsar CONSULTAR IRSA. No hay observaciones precargadas.</div>
+        <p class="small" id="liveMeta">Fuente: NASA/IPAC IRSA · SPHEREx · Última consulta: —</p>
+      </section>
+
+      <section class="card" id="cine">
+        <h3>02 / Cine del cielo — línea de tiempo, Play y Parpadeo</h3>
+        <p class="small">Cada fotograma es una fecha distinta devuelta por IRSA. <strong>Play</strong> recorre las fechas en orden. <strong>Parpadeo</strong> alterna entre la primera y la última época. Es comparación visual, no una resta de píxeles del servidor.</p>
+        <div class="controls">
+          <button class="btn" id="playBtn" disabled>▶ Play</button>
+          <button class="btn" id="pauseBtn" disabled>⏸ Pausa</button>
+          <button class="btn" id="blinkBtn" disabled>◐ Parpadeo 1ª ↔ última</button>
+          <button class="btn" id="prevBtn" disabled>‹ Anterior</button>
+          <button class="btn" id="nextBtn" disabled>Siguiente ›</button>
+          <label style="margin:0">Velocidad <input type="range" id="speed" min="400" max="3000" step="100" value="1200"> <span id="speedLabel">1.2 s</span></label>
+        </div>
+        <div class="timeline" id="timeline"><span class="small">Haz una consulta para construir la línea de tiempo con las fechas reales de IRSA.</span></div>
+        <div class="mono" id="frameInfo">Fotograma: —</div>
+        <div id="bands" style="margin-top:14px"></div>
+        <p class="small" id="frameCount">Sin fotogramas todavía</p>
+      </section>
+
+      <section class="card" id="resultados">
+        <h3>03 / Resultados de archivo</h3>
+        <p><button class="btn" id="csvBtn" disabled>↓ Exportar CSV</button></p>
+        <div class="tablewrap"><table>
+          <thead><tr><th>OBSERVACIÓN</th><th>OBJETO</th><th>COLECCIÓN</th><th>BANDA</th><th>FECHA</th><th>CENTRO DE EXPOSICIÓN RA / DEC</th><th></th></tr></thead>
+          <tbody id="rows"><tr><td colspan="7" style="text-align:center;color:#93a9c0;padding:28px">Configura una búsqueda para consultar el archivo SPHEREx.</td></tr></tbody>
+        </table></div>
+        <p class="small" id="note">RA / DEC de la tabla es el centro de cada exposición SPHEREx (s_ra / s_dec de IRSA), no la posición exacta de una fuente en el punto consultado.</p>
+      </section>
+
+      <section class="card" id="visor">
+        <h3>04 / Visor de imágenes FITS</h3>
+        <p>
+          <button class="btn" id="cutoutBtn" disabled>Crear recorte</button>
+          <button class="btn" id="fitsBtn" disabled>Abrir FITS</button>
+        </p>
+        <div class="viewer" id="viewer"><div class="empty"><div><div style="font-size:40px">⌁</div><strong>Visor astronómico</strong><p>Selecciona una observación o un fotograma del Cine para cargar su FITS.</p></div></div></div>
+        <p class="small" id="viewerInfo">El visor usa JS9. Los datos proceden de IRSA, no de imágenes de muestra.</p>
+      </section>
+
+      <section class="card">
+        <h3>05 / Información del producto seleccionado</h3>
+        <div id="details" class="notice">Aún no hay una observación seleccionada.</div>
+      </section>
+
+      <section class="card" id="irsa">
+        <h3>06 / IRSA en vivo — el archivo, dentro de esta página</h3>
+        <p class="small">Abajo ves la documentación oficial del archivo SPHEREx de IRSA incrustada aquí. Si tu navegador bloquea el marco, ábrela con el botón: es la misma fuente de todos los datos de esta herramienta. Nada procede de otro archivo astronómico.</p>
+        <p>
+          <a class="btn" href="https://irsa.ipac.caltech.edu/spherex-archive-documentation/" target="_blank" rel="noopener" style="text-decoration:none">Abrir documentación IRSA ↗</a>
+          <button class="btn" id="healthBtn">Comprobar estado del servicio</button>
+        </p>
+        <div id="health" class="notice" style="display:none"></div>
+        <iframe class="irsa" title="Documentación del archivo SPHEREx en IRSA" src="https://irsa.ipac.caltech.edu/spherex-archive-documentation/"></iframe>
+      </section>
+
+      <section class="card" id="guia">
+        <h3>07 / Guía — cómo descubrir algo nuevo</h3>
+        <div class="cards">
+          <div class="info"><h4>1 · Busca movimiento</h4><p>Compara la misma zona en dos fechas. Un asteroide se desplaza, una estrella cercana se mueve poco a poco, una variable cambia de brillo. Anota fecha, obs_id y banda.</p></div>
+          <div class="info"><h4>2 · Las 102 bandas, en 6 detectores</h4><p>SPHEREx observa en 102 bandas del infrarrojo cercano, en 6 detectores (D1–D6). Debajo del Cine verás la cobertura real en longitud de onda (em_min–em_max) que IRSA devolvió para tu búsqueda.</p></div>
+          <div class="info"><h4>3 · Objetos de prueba</h4><p class="mono">Barnard · 269.452077, +4.693365<br>Epsilon Indi B · 331.044146, −56.782844<br>WISE 0855 · 133.795125, −7.245147<br>RW Aur · 76.956526, +30.401438<br>R Dra · 248.167625, +66.754972</p><p style="margin-top:8px">Empieza por Barnard y WISE 0855, los que más se mueven.</p></div>
+          <div class="info"><h4>4 · Lee los metadatos</h4><p><span class="mono">t_min</span> es la fecha (aquí en calendario, con su MJD). <span class="mono">s_ra / s_dec</span> es el centro de la exposición. <span class="mono">em_min / em_max</span> es el rango de la banda. <span class="mono">access_url</span> es el FITS real en IRSA.</p></div>
+          <div class="info"><h4>5 · Límites honestos</h4><p>SPHEREx vuelve a cada zona cada ~6 meses, así que la línea de tiempo depende de lo publicado en IRSA. Con radios grandes IRSA puede tardar o fallar: reduce el campo. Un movimiento menor que un píxel (6.15″) no se verá saltar.</p></div>
+          <div class="info"><h4>6 · Si ves algo raro</h4><p>Guarda el enlace con coordenadas, exporta el CSV, anota obs_id, fecha y banda, y vuelve a consultar otro día. Si el punto se mueve de forma coherente en tres o más épocas, merece una segunda mirada.</p></div>
+        </div>
+      </section>
+    </section>
+  </div>
+</main>
+
+<footer>
+  <strong>SPHEREx Explorer</strong> es un proyecto independiente y no es un producto oficial de NASA, JPL, Caltech ni IRSA. Todos los datos, imágenes FITS y metadatos se consultan en tiempo real desde el archivo público de IRSA.
+  <br>Fuente única de datos: <a href="https://irsa.ipac.caltech.edu/spherex-archive-documentation/" target="_blank" rel="noopener">IRSA SPHEREx Archive</a> · Visor: <a href="https://www.js9.si.edu/" target="_blank" rel="noopener">JS9</a>
+</footer>
+<script src="app.js"></script>
+</body>
+</html>
