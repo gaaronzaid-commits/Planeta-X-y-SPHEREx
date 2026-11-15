@@ -402,17 +402,6 @@ window.CONFIG = {
   </div>
 </section>
 
-<section id="visor-spherex">
-  <div class="wrap">
-    <div class="sec-head">
-      <h2 data-editable>Visor SPHEREx de IRSA — Imágenes espectrales</h2>
-      <p data-editable>La aplicación oficial de SPHEREx en IRSA, dentro de esta página. Aquí ves las imágenes espectrales reales del telescopio, tal como las publica la NASA.</p>
-    </div>
-    <div class="map-frame"><iframe title="Visor SPHEREx de IRSA — Imágenes espectrales" src="https://irsa.ipac.caltech.edu/applications/spherex/?api=spectral-images&amp;ra=83.822&amp;dec=-5.391&amp;sr=1d" loading="lazy" allowfullscreen></iframe></div>
-    <p style="color:var(--texto-suave);font-size:.93rem;margin-top:14px">Fuente: NASA/IPAC IRSA — aplicación oficial de SPHEREx. Si el visor tarda en cargar, espera unos segundos: es la aplicación de IRSA trabajando.</p>
-  </div>
-</section>
-
 <section id="que-es">
   <div class="wrap">
     <div class="sec-head">
@@ -530,6 +519,9 @@ window.CONFIG = {
       <h3 data-editable>IRSA: espectrofotometría de SPHEREx</h3>
       <p data-editable>En IRSA, el archivo oficial de la NASA, eliges un punto del cielo y ves su espectro: cuánta luz infrarroja llega en cada color. Es gratis y no necesitas cuenta.</p>
       <a class="btn btn-main" href="https://irsa.ipac.caltech.edu/applications/spherex/tool-spectrophotometry" target="_blank" rel="noopener" id="irsaExplorerLink">Abrir la herramienta de espectrofotometría en IRSA ↗</a>
+      <h4 style="margin:24px 0 8px;font-size:1.15rem">Visor SPHEREx de IRSA — Imágenes espectrales</h4>
+      <p class="map-coords" id="spherexCoords" style="margin-top:0">Punto del visor: Nebulosa de Orión — RA 83.822° · Dec −5.391°.</p>
+      <div class="map-frame"><iframe id="spherexFrame" title="Visor SPHEREx de IRSA — Imágenes espectrales" src="https://irsa.ipac.caltech.edu/applications/spherex/?api=spectral-images&amp;ra=83.822&amp;dec=-5.391&amp;sr=1d" loading="lazy" allowfullscreen></iframe></div>
     </div>
   </div>
 </section>
@@ -1193,6 +1185,9 @@ window.CONFIG = {
     /* Mover también el cielo en vivo que parpadea a este punto, SIN arrastrar
        la página: los enlaces quedan a la vista aquí mismo. */
     updateBlinkViewer(ra, dec, fov, name);
+    /* Y también el visor de SPHEREx y el mapa real de IRSA siguen a este punto. */
+    updateSpherexViewer(ra, dec, fov, name);
+    setFinderFrame(ra, dec, name);
     toast("Punto fijado: "+formatRaDec(ra,dec)+" — cargando las imágenes oficiales de ese lugar…");
   }
   /* Presets */
@@ -1366,6 +1361,20 @@ window.CONFIG = {
   /* ===== MAPA REAL DEL CIELO (IRSA Viewer / Finder Chart) ===== */
   function finderUrl(ra, dec){
     return "https://irsa.ipac.caltech.edu/applications/finderchart/servlet/api?mode=getResult&locstr=" + encodeURIComponent(ra + " " + dec);
+  }
+  function setFrameSrc(frame, url){
+    if(!frame) return;
+    if(frame.getAttribute("src")===url){ frame.src="about:blank"; setTimeout(function(){ frame.src=url; }, 60); }
+    else { frame.src=url; }
+  }
+  function spherexUrl(ra, dec, fov){
+    var sr=Math.min(fov||1, 3);
+    return "https://irsa.ipac.caltech.edu/applications/spherex/?api=spectral-images&ra="+ra.toFixed(4)+"&dec="+dec.toFixed(4)+"&sr="+sr+"d";
+  }
+  function updateSpherexViewer(ra, dec, fov, name){
+    var f=$("spherexFrame"); if(!f) return;
+    setFrameSrc(f, spherexUrl(ra, dec, fov));
+    var sc=$("spherexCoords"); if(sc) sc.textContent="Punto del visor: "+(name?name+" — ":"")+formatRaDec(ra, dec)+".";
   }
   function setFinderFrame(ra, dec, name){
     var f=$("finderFrame"); if(!f) return;
