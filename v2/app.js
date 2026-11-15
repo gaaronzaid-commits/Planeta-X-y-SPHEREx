@@ -88,14 +88,13 @@ function updateSpherexFrame(ra, dec, radius) {
 function resetSearch() {
   $("name").value = "Barnard's Star";
   $("ra").value = "269.452077"; $("dec").value = "4.693365"; $("radius").value = "0.05";
-  $("mapRa").value = "269.452077"; $("mapDec").value = "4.693365";
   showFunFact("Barnard's Star");
   search();
 }
 function loadFromURL() {
   const p = new URLSearchParams(location.search);
-  if (p.get("ra")) { $("ra").value = p.get("ra"); $("mapRa").value = p.get("ra"); }
-  if (p.get("dec")) { $("dec").value = p.get("dec"); $("mapDec").value = p.get("dec"); }
+  if (p.get("ra")) { $("ra").value = p.get("ra"); }
+  if (p.get("dec")) { $("dec").value = p.get("dec"); }
   if (p.get("radius")) $("radius").value = p.get("radius");
   if (p.get("name")) $("name").value = p.get("name");
   return !!(p.get("ra") && p.get("dec"));
@@ -117,15 +116,14 @@ function finderURL(ra, dec) {
   return "https://irsa.ipac.caltech.edu/applications/finderchart/servlet/api?mode=getResult&locstr=" + encodeURIComponent(ra + " " + dec);
 }
 function goToMap(quiet = false) {
-  const ra = $("mapRa").value.trim() || $("ra").value.trim();
-  const dec = $("mapDec").value.trim() || $("dec").value.trim();
+  const ra = $("ra").value.trim();
+  const dec = $("dec").value.trim();
   if (!ra || !dec) { if (!quiet) msg("Escribe RA y DEC para centrar el mapa.", ""); return false; }
   const r = Number(ra), d = Number(dec);
   if (!Number.isFinite(r) || !Number.isFinite(d) || r < 0 || r >= 360 || d < -90 || d > 90) {
     if (!quiet) msg("Las coordenadas del mapa no son válidas. RA debe estar entre 0 y 360, DEC entre −90 y 90.", "error");
     return false;
   }
-  $("mapRa").value = ra; $("mapDec").value = dec;
   setFrameSrc($("mapFinder"), finderURL(ra, dec));
   $("mapNote").textContent = `Mapa centrado en RA ${ra}°, DEC ${dec}°. Si el mapa no carga dentro de la página, ábrelo con los botones de arriba: es el mapa real de IRSA.`;
   showMapTab("finder");
@@ -185,8 +183,7 @@ async function search() {
     if (!Number.isFinite(r) || !Number.isFinite(d) || r < 0 || r >= 360 || d < -90 || d > 90)
       throw new Error("Coordenadas no válidas. RA 0–360, DEC −90 a 90.");
     const radius = $("radius").value;
-    $("mapRa").value = ra; $("mapDec").value = dec; // el mapa sigue a la búsqueda
-    $("searchBtn").disabled = true; $("spherexSearchBtn").disabled = true;
+    $("searchBtn").disabled = true;
     updateSpherexFrame(r, d, radius);
     goToMap(true); // "Consultar IRSA" también centra el mapa, como el botón "Ver en el mapa"
     live("loading");
@@ -215,12 +212,11 @@ async function search() {
   } catch (e) {
     live("error");
     msg(e.message, "error");
-  } finally { $("searchBtn").disabled = false; $("spherexSearchBtn").disabled = false; }
+  } finally { $("searchBtn").disabled = false; }
 }
 
 /* ---- Eventos ---- */
 $("searchBtn").addEventListener("click", search);
-$("spherexSearchBtn").addEventListener("click", search);
 $("spherexOpenBtn").addEventListener("click", () => {
   const ra = $("ra").value.trim(), dec = $("dec").value.trim(), radius = $("radius").value;
   if (!ra || !dec) { msg("Escribe RA y DEC para abrir IRSA.", ""); return; }
@@ -242,10 +238,8 @@ $("healthBtn").addEventListener("click", async () => {
 });
 document.querySelectorAll("[data-ra]").forEach((b) => b.addEventListener("click", () => {
   $("name").value = b.dataset.name; $("ra").value = b.dataset.ra; $("dec").value = b.dataset.dec;
-  $("mapRa").value = b.dataset.ra; $("mapDec").value = b.dataset.dec;
   showFunFact(b.dataset.name);
 }));
-$("mapBtn").addEventListener("click", () => goToMap());
 $("tabViewer").addEventListener("click", () => showMapTab("viewer"));
 $("tabFinder").addEventListener("click", () => showMapTab("finder"));
 

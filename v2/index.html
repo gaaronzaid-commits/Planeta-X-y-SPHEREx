@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=5">
+<link rel="stylesheet" href="styles.css?v=6">
 </head>
 <body>
 <canvas id="stars" aria-hidden="true"></canvas>
@@ -93,7 +93,6 @@
         <h3>Visor SPHEREx de IRSA — Imágenes espectrales</h3>
         <p class="small">La aplicación oficial de IRSA para SPHEREx, dentro de esta página. Al pulsar “Consultar IRSA”, este visor viaja a tus coordenadas y el mapa de abajo también se centra en ese punto. Encima del visor verás siempre el punto que se está analizando. Si IRSA impide mostrarlo dentro de la ventana, usa “Abrir IRSA completo”.</p>
         <div class="controls">
-          <button class="btn primary" id="spherexSearchBtn" style="width:auto;margin-top:0">Run IRSA Search</button>
           <button class="btn" id="spherexOpenBtn">Open Full IRSA ↗</button>
         </div>
         <div class="viewer-info"><span>DATA SOURCE: NASA/IPAC INFRARED SCIENCE ARCHIVE</span><span id="coordinates">RA: — | DEC: —</span></div>
@@ -106,13 +105,8 @@
       <section class="card" id="mapa">
         <div class="sect-num">03 / MAPA INTERACTIVO</div>
         <h3>Mapa real del cielo · IRSA Viewer y Finder Chart</h3>
-        <p class="small">El mapa interactivo de IRSA. Escribe RA y DEC y pulsa “Ver en el mapa”: el mapa se centrará en ese punto. También se centra solo cuando pulsas “Consultar IRSA” arriba. También puedes introducir coordenadas directamente dentro del mapa.</p>
-        <div class="two">
-          <div><label for="mapRa">RA (°) para el mapa</label><input id="mapRa" type="number" step="any" placeholder="269.452077"></div>
-          <div><label for="mapDec">DEC (°) para el mapa</label><input id="mapDec" type="number" step="any" placeholder="4.693365"></div>
-        </div>
+        <p class="small">El mapa interactivo de IRSA. Se centra solo en el punto que buscas cuando pulsas “Consultar IRSA” arriba. También puedes introducir coordenadas directamente dentro del mapa.</p>
         <p>
-          <button class="btn primary" id="mapBtn" style="width:auto">Ver en el mapa de IRSA</button>
           <a class="btn" href="https://irsa.ipac.caltech.edu/irsaviewer/" target="_blank" rel="noopener" style="text-decoration:none">Abrir IRSA Viewer ↗</a>
           <a class="btn" href="https://irsa.ipac.caltech.edu/applications/finderchart/" target="_blank" rel="noopener" style="text-decoration:none">Abrir Finder Chart ↗</a>
         </p>
@@ -145,13 +139,6 @@
           <div class="info"><h4>Enana marrón</h4><p>Un objeto más grande que un planeta gigante, pero sin masa suficiente para encenderse como una estrella. Son frías y brillan sobre todo en infrarrojo.</p></div>
           <div class="info"><h4>Estrella variable</h4><p>Una estrella cuyo brillo sube y baja con el tiempo, como si respirara.</p></div>
         </div>
-        <h3 style="margin-top:24px">Objetos para empezar</h3>
-        <p class="small">Pulsa una tarjeta en el panel de búsqueda y se llenan las coordenadas solas.</p>
-        <p class="mono">Barnard's Star · 269.452077, +4.693365 — la estrella que más rápido se mueve.<br>
-        Epsilon Indi B · 331.044146, −56.782844 — dos enanas marrones juntas.<br>
-        WISE 0855 · 133.795125, −7.245147 — la enana marrón más fría conocida.<br>
-        RW Aurigae · 76.956526, +30.401438 — una estrella joven que cambia de brillo.<br>
-        R Draconis · 248.167625, +66.754972 — una estrella que late cada varios meses.</p>
         <h3 style="margin-top:24px">Planet X · Research objectives</h3>
         <p class="small">Líneas de investigación para el estudio de posibles objetos astronómicos mediante observaciones infrarrojas. El Planeta X es hipotético: aquí se buscan candidatos, no se afirma su existencia.</p>
         <div class="cards">
@@ -235,6 +222,6 @@
   addEventListener("resize",size); size(); requestAnimationFrame(draw);
 })();
 </script>
-<script src="app.js?v=5"></script>
+<script src="app.js?v=6"></script>
 </body>
 </html>
