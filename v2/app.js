@@ -135,6 +135,19 @@ function renderEpochs() {
 }
 
 /* ---- Búsqueda IRSA ---- */
+async function fetchSIA(collection, r, d, radius) {
+  const ctl = new AbortController();
+  const t = setTimeout(() => ctl.abort(), 40000);
+  try {
+    const res = await fetch(apiUrl("/api/sia", { collection, ra: r, dec: d, radius, maxrec: MAXREC }), { signal: ctl.signal });
+    const body = await res.text();
+    if (!res.ok) throw new Error(collection + ": " + body.slice(0, 200));
+    return parseCSV(body);
+  } catch (e) {
+    if (e.name === "AbortError") throw new Error(collection + ": IRSA tardó demasiado en responder (40 s).");
+    throw e;
+  } finally { clearTimeout(t); }
+}
 async function search() {
   $("msg").style.display = "none";
   const name = $("name").value.trim();
@@ -156,12 +169,7 @@ async function search() {
     $("searchBtn").disabled = true;
     live("loading");
     rows = [];
-    const jobs = COLLECTIONS.map(async (collection) => {
-      const res = await fetch(apiUrl("/api/sia", { collection, ra: r, dec: d, radius, maxrec: MAXREC }));
-      const body = await res.text();
-      if (!res.ok) throw new Error(collection + ": " + body.slice(0, 200));
-      return parseCSV(body);
-    });
+    const jobs = COLLECTIONS.map((collection) => fetchSIA(collection, r, d, radius));
     const done = await Promise.allSettled(jobs);
     const errors = [];
     done.forEach((res, i) => {
@@ -220,5 +228,9 @@ $("tabViewer").addEventListener("click", () => showMapTab("viewer"));
 $("tabFinder").addEventListener("click", () => showMapTab("finder"));
 
 /* ---- Inicio ---- */
+window.addEventListener("error", (e) => {
+  const box = $("msg");
+  if (box) { box.textContent = "Error en la página: " + (e.message || "desconocido") + ". Recarga la página e inténtalo de nuevo."; box.className = "notice error"; box.style.display = "block"; }
+});
 $("status").textContent = "● API CONFIGURADA";
 if (loadFromURL()) search();
