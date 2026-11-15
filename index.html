@@ -159,7 +159,7 @@ a{color:#8fddea}
         <div class="metric"><small>ESTADO DE CONSULTA</small><strong id="queryState" style="font-size:15px">EN ESPERA</strong></div>
       </div>
 
-      <section class="panel">
+      <section class="panel" id="livePanel"><h3>Datos en vivo de IRSA</h3><div id="liveStatus" class="notice">Sin consulta todavía. Los datos se obtienen en tiempo real desde IRSA al pulsar CONSULTAR IRSA, no hay observaciones precargadas.</div><div class="hint" id="liveDetails">Fuente: NASA/IPAC IRSA · SPHEREx · Última consulta: —</div></section><section class="panel">
         <div class="toolbar">
           <h3>02 / Resultados de archivo</h3>
           <div>
@@ -170,14 +170,14 @@ a{color:#8fddea}
           <table>
             <thead><tr>
               <th>OBSERVACIÓN</th><th>OBJETO / TARGET</th><th>COLECCIÓN</th>
-              <th>BANDA</th><th>FECHA</th><th>RA / DEC</th><th>VISUALIZAR</th>
+              <th>BANDA</th><th>FECHA</th><th>CENTRO DE EXPOSICIÓN RA / DEC</th><th>VISUALIZAR</th>
             </tr></thead>
             <tbody id="resultsBody">
               <tr><td colspan="7" style="text-align:center;color:#91a8bf;padding:30px">Configura una búsqueda para consultar el archivo SPHEREx.</td></tr>
             </tbody>
           </table>
         </div>
-        <p class="hint" id="resultNote">Los resultados se obtendrán desde IRSA; esta tabla no contiene observaciones precargadas.</p>
+        <p class="hint" id="resultNote">RA / DEC de la tabla es el centro de cada exposición SPHEREx (s_ra / s_dec de IRSA), no la posición exacta de una fuente en el punto consultado.</p>
       </section>
 
       <section class="panel">
@@ -273,7 +273,7 @@ async function resolveName(name){
   return await response.json();
 }
 
-async function searchIRSA(){
+function formatMJD(value){ const m=Number(value); if(!Number.isFinite(m)) return value||"—"; const d=new Date(Date.UTC(1858,10,17)+m*86400000); if(isNaN(d.getTime())) return String(value); return d.toISOString().slice(0,10)+" "+d.toISOString().slice(11,16)+" UTC (MJD "+m+")"; } function updateLivePanel(state, ra, dec, radius, count, collections){ const now=new Date(); const time=now.toLocaleString("es-MX",{timeZone:"America/Mexico_City"}); const el=document.getElementById("liveStatus"); const det=document.getElementById("liveDetails"); if(el) el.textContent = state==="ok" ? "Consulta completada en tiempo real desde IRSA. Se recibieron "+count+" registros." : state==="error" ? "La última consulta a IRSA falló. Intenta de nuevo." : "Consultando IRSA en tiempo real…"; if(det) det.textContent="Fuente: NASA/IPAC IRSA · SPHEREx · Última consulta: "+time+" (hora de México) · Centro: RA "+ra+"°, DEC "+dec+"° · Radio "+radius+"° · Colecciones: "+collections; } async function searchIRSA(){
   hideMessage();
   if(!apiReady()){
     showMessage("Primero debes publicar el Cloudflare Worker y colocar su dirección en la constante API_BASE del archivo index.html.","error");
@@ -301,7 +301,7 @@ async function searchIRSA(){
     const maxrec=$("maxrec").value;
 
     $("searchBtn").disabled=true;
-    $("queryState").textContent="CONSULTANDO";
+    $("queryState").textContent="CONSULTANDO"; updateLivePanel("loading", r, d, radius, 0, collections.join(", "));
     $("resultsBody").innerHTML='<tr><td colspan="7" style="text-align:center;padding:30px">Consultando los servidores de IRSA…</td></tr>';
     observations=[];
     selectedObservation=null;
@@ -335,13 +335,13 @@ async function searchIRSA(){
     $("queryState").textContent=errors.length?"PARCIAL":"COMPLETADA";
     $("exportBtn").disabled=observations.length===0;
 
-    renderResults();
+    renderResults(); updateLivePanel(errors.length?"error":"ok", r, d, radius, observations.length, collections.join(", "));
     if(errors.length)showMessage("Algunas colecciones no respondieron: "+errors.join(" | "),"error");
     else if(observations.length)showMessage("Consulta completada. Se recibieron "+observations.length+" registros de IRSA.","good");
     else showMessage("IRSA respondió, pero no devolvió observaciones para estas coordenadas, radio y colecciones.","");
     $("resultNote").textContent="Centro consultado: RA "+r+"°, DEC "+d+"° · Radio "+radius+"° · Respuesta obtenida en tiempo real desde IRSA.";
   }catch(error){
-    $("queryState").textContent="ERROR";
+    $("queryState").textContent="ERROR"; updateLivePanel("error", ra, dec, document.getElementById("radius").value, 0, "");
     $("resultsBody").innerHTML='<tr><td colspan="7" style="text-align:center;padding:25px">No fue posible completar la consulta.</td></tr>';
     showMessage(error.message,"error");
   }finally{
@@ -359,7 +359,7 @@ function renderResults(){
     const obs=value(o,"obs_id","obs_publisher_did","dp_id");
     const target=value(o,"target_name","target","object");
     const band=value(o,"energy_bandpassname","band","em_band");
-    const date=value(o,"t_min","date_obs","obs_date");
+    const date=formatMJD(value(o,"t_min","date_obs","obs_date"));
     const ra=value(o,"s_ra","ra");
     const dec=value(o,"s_dec","dec");
     return `<tr data-index="${i}">
@@ -397,7 +397,7 @@ function selectObservation(index){
     <div><strong>Banda espectral:</strong> ${escapeHTML(value(o,"energy_bandpassname"))}</div>
     <div><strong>Límite inferior:</strong> ${escapeHTML(value(o,"em_min"))}</div>
     <div><strong>Límite superior:</strong> ${escapeHTML(value(o,"em_max"))}</div>
-    <div><strong>Tiempo:</strong> ${escapeHTML(value(o,"t_min"))}</div>
+    <div><strong>Tiempo:</strong> ${escapeHTML(formatMJD(value(o,"t_min")))}</div>
     <div><strong>Formato:</strong> ${escapeHTML(value(o,"access_format"))}</div>
     <div style="margin-top:9px;overflow-wrap:anywhere"><strong>URL del producto:</strong><br>${escapeHTML(access)}</div>`;
   $("openFitsBtn").disabled=!access||access==="—";
