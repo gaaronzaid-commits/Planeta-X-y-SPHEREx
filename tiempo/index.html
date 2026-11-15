@@ -660,15 +660,11 @@ window.CONFIG = {
       <h2 data-editable>Mapa real del cielo</h2>
       <p data-editable>Los mapas oficiales de IRSA, el archivo de la NASA, dentro de esta página. Mueve el mapa, acerca, aleja y busca cualquier punto del cielo con sus fotos reales de varios telescopios.</p>
     </div>
-    <p class="map-note"><strong>¿Cómo se usa?</strong> El mapa arranca en el punto que elegiste arriba (Nebulosa de Orión). Si cambias de punto en “Ve a un punto exacto del cielo”, pulsa <strong>“Centrar el mapa en ese punto”</strong> y el Finder Chart se mueve allí. En el IRSA Viewer escribe las coordenadas o el nombre del objeto en su propio buscador, arriba a la izquierda.</p>
+    <p class="map-note"><strong>¿Cómo se usa?</strong> El mapa sigue solo al punto que elijas arriba: al pulsar <strong>“Ver ese punto aquí mismo”</strong>, el Finder Chart se mueve a ese punto. Si quieres, el botón <strong>“Centrar el mapa en ese punto”</strong> también lo mueve cuando quieras.</p>
     <div class="map-tabs" role="tablist" aria-label="Mapas reales de IRSA">
-      <button class="tl-btn on" type="button" role="tab" aria-selected="true" data-mtab="viewer">IRSA Viewer</button>
-      <button class="tl-btn" type="button" role="tab" aria-selected="false" data-mtab="finder">Finder Chart</button>
+      <button class="tl-btn on" type="button" role="tab" aria-selected="true" data-mtab="finder">Finder Chart</button>
     </div>
-    <div data-mpanel="viewer">
-      <div class="map-frame"><iframe title="IRSA Viewer — mapa interactivo del cielo de IRSA" src="https://irsa.ipac.caltech.edu/irsaviewer/" loading="lazy" allowfullscreen></iframe></div>
-    </div>
-    <div data-mpanel="finder" hidden>
+    <div data-mpanel="finder">
       <div class="map-frame"><iframe id="finderFrame" title="Finder Chart de IRSA — fotos del cielo del punto elegido" src="https://irsa.ipac.caltech.edu/applications/finderchart/servlet/api?mode=getResult&amp;locstr=83.822%20-5.391" loading="lazy" allowfullscreen></iframe></div>
       <p class="map-coords" id="mapCoords">Punto del mapa: Nebulosa de Orión — RA 83.822° · Dec −5.391°.</p>
       <div class="map-actions">
