@@ -367,7 +367,7 @@ window.CONFIG = {
       <a href="#mapa-cielo">Mapa del cielo</a>
       <a href="#galeria">Galería</a>
       <a href="#equipo">Equipo</a>
-      <a class="irsa-link" href="https://irsa.ipac.caltech.edu/applications/spherex/tool-spectrophotometry" target="_blank" rel="noopener" id="navIrsa">IRSA · Espectrofotometría ↗</a>
+      <a class="irsa-link" href="#irsa" id="navIrsa">IRSA · Espectrofotometría ↓</a>
     </nav>
   </div>
 </header>
@@ -386,7 +386,7 @@ window.CONFIG = {
     <p class="sub" data-cfg="subtitulo" data-editable>Un visor sencillo para explorar las imágenes del telescopio SPHEREx de la NASA.</p>
     <div class="cta">
       <a class="btn btn-main" href="#visor">Abrir el visor del cielo</a>
-      <a class="btn btn-irsa" href="https://irsa.ipac.caltech.edu/applications/spherex/tool-spectrophotometry" target="_blank" rel="noopener" id="heroIrsa">Espectrofotometría en IRSA ↗</a>
+      <a class="btn btn-irsa" href="#irsa" id="heroIrsa">Espectrofotometría en IRSA ↓</a>
       <a class="btn btn-ghost" href="#comparador">Comparar imágenes</a>
     </div>
     <figure class="hero-fig">
@@ -489,7 +489,7 @@ window.CONFIG = {
         </div>
         <p style="font-size:.92rem">En 3,3 µm brillan unas moléculas llamadas PAH, muy comunes donde nacen estrellas. En otros colores, desaparecen. Esa diferencia es la pista.</p>
         <div class="thumbs" id="thumbs" role="group" aria-label="Elegir imagen del visor"></div>
-        <a class="btn btn-main" style="margin-top:16px;width:100%;justify-content:center" href="https://irsa.ipac.caltech.edu/applications/spherex/tool-spectrophotometry" target="_blank" rel="noopener" id="sideIrsa">Ver su espectro en IRSA ↗</a>
+        <a class="btn btn-main" style="margin-top:16px;width:100%;justify-content:center" href="#irsa" id="sideIrsa">Ver su espectro en IRSA ↓</a>
       </aside>
     </div>
   </div>
@@ -522,6 +522,7 @@ window.CONFIG = {
       <h4 style="margin:24px 0 8px;font-size:1.15rem">Visor SPHEREx de IRSA — Imágenes espectrales</h4>
       <p class="map-coords" id="spherexCoords" style="margin-top:0">Punto del visor: Nebulosa de Orión — RA 83.822° · Dec −5.391°.</p>
       <div class="map-frame"><iframe id="spherexFrame" title="Visor SPHEREx de IRSA — Imágenes espectrales" src="https://irsa.ipac.caltech.edu/applications/spherex/?api=spectral-images&amp;ra=83.822&amp;dec=-5.391&amp;sr=1d" loading="lazy" allowfullscreen></iframe></div>
+      <p class="map-note" id="spherexError" hidden style="margin-top:12px"><strong>Esto no es un error de esta página.</strong> La ventana de arriba es la aplicación oficial de IRSA (NASA/IPAC); esta página solo la muestra tal cual. Si ves el error «TAP service does not appear to exist» o el botón de búsqueda dentro de IRSA no termina de cargar, es porque el propio servicio de IRSA no está respondiendo en este momento. No se puede arreglar desde aquí: espera unos minutos y vuelve a intentarlo.</p>
     </div>
   </div>
 </section>
@@ -595,7 +596,7 @@ window.CONFIG = {
               <figcaption id="coordImgCap">Imagen oficial de NASA SkyView (NASA GSFC) de RA 83.822° · Dec −5.391°.</figcaption>
             </figure>
             <div class="coord-result" id="coordResult">
-              <a id="linkIrsaCoord" href="https://irsa.ipac.caltech.edu/applications/spherex/tool-spectrophotometry" target="_blank" rel="noopener">Ver su espectro en IRSA — SPHEREx ↗</a>
+              <a id="linkIrsaCoord" href="#irsa">Ver su espectro en IRSA — SPHEREx ↓</a>
               <a id="linkSkyView" href="https://skyview.gsfc.nasa.gov/current/cgi/query.pl?Position=83.822%2C-5.391&amp;Size=3.0&amp;Survey=DSS" target="_blank" rel="noopener">Ver este punto en NASA SkyView ↗</a>
             </div>
             <p id="coordCopy" style="font-weight:700;color:var(--texto)"></p>
@@ -615,7 +616,7 @@ window.CONFIG = {
                 <button class="icon-btn" type="button" id="blinkLeft" aria-label="Mover hacia la izquierda">←</button>
                 <button class="icon-btn" type="button" id="blinkRight" aria-label="Mover hacia la derecha">→</button>
                 <button class="btn btn-ghost" type="button" id="blinkToggle" style="min-height:44px;padding:8px 14px">Pausar parpadeo</button>
-                <a class="btn btn-main" id="blinkIrsaLink" href="https://irsa.ipac.caltech.edu/applications/spherex/tool-spectrophotometry" target="_blank" rel="noopener" style="min-height:44px;padding:8px 14px">Este punto en IRSA ↗</a>
+                <a class="btn btn-main" id="blinkIrsaLink" href="#irsa" style="min-height:44px;padding:8px 14px">Este punto en IRSA ↓</a>
                 <a class="btn btn-ghost" id="blinkSkyViewLink" href="https://skyview.gsfc.nasa.gov/current/cgi/query.pl?Position=83.822%2C-5.391&amp;Size=3.0&amp;Survey=DSS" target="_blank" rel="noopener" style="min-height:44px;padding:8px 14px">Este punto en NASA SkyView ↗</a>
               </div>
             </div>
@@ -752,7 +753,7 @@ window.CONFIG = {
       <div class="card">
         <h3>La misión, en fuentes oficiales</h3>
         <ul>
-          <li><a href="https://irsa.ipac.caltech.edu/applications/spherex/tool-spectrophotometry" target="_blank" rel="noopener">Espectrofotometría de SPHEREx — IRSA</a></li>
+          <li><a href="#irsa">Espectrofotometría de SPHEREx — IRSA</a></li>
           <li><a href="https://www.jpl.nasa.gov/press-kits/spherex/" target="_blank" rel="noopener">Kit de prensa de SPHEREx — NASA JPL</a></li>
           <li><a href="https://www.jpl.nasa.gov/images/pia26600-spherexs-first-all-sky-map/" target="_blank" rel="noopener">El primer mapa completo del cielo — NASA JPL</a></li>
           <li><a href="https://www.jpl.nasa.gov/images/pia26541-spherex-prepared-for-thermal-vacuum-testing/" target="_blank" rel="noopener">SPHEREx en la cámara de pruebas — NASA JPL</a></li>
@@ -775,7 +776,7 @@ window.CONFIG = {
         <h3>Sobre esta página</h3>
         <p>«Planeta X y SPHEREx» es un proyecto educativo independiente, sin afiliación oficial con la NASA. Hecho por un equipo de 6 estudiantes.</p>
         <p>Hecha a mano (y a tropiezos) por estudiantes. Si algo está mal explicado, probablemente lo escribimos nosotros un viernes por la tarde: avísanos y lo corregimos.</p>
-        <p><a href="#inicio">Volver arriba ↑</a> · <a href="https://irsa.ipac.caltech.edu/applications/spherex/tool-spectrophotometry" target="_blank" rel="noopener">IRSA ↗</a></p>
+        <p><a href="#inicio">Volver arriba ↑</a> · <a href="#irsa">IRSA ↓</a></p>
       </div>
     </div>
   </div>
@@ -826,7 +827,7 @@ window.CONFIG = {
   document.querySelectorAll("[data-cfg]").forEach(function(el){ var k=el.getAttribute("data-cfg"); if(C[k]) el.textContent=C[k]; });
   function setMail(){ var mb=$("mailBtn"), mt=$("mailText"); if(mb) mb.href="mailto:"+C.correoContacto; if(mt){ mt.href="mailto:"+C.correoContacto; mt.textContent=C.correoContacto; } }
   setMail();
-  function setIrsa(){ ["navIrsa","heroIrsa","sideIrsa","irsaExplorerLink"].forEach(function(id){ var a=$(id); if(a) a.href=C.irsaExplorer; }); var ar=$("irsaArchivoLink"); if(ar) ar.href=C.irsaArchivo; var g=$("irsaGuiaLink"); if(g) g.href=C.irsaGuia; }
+  function setIrsa(){ ["navIrsa","heroIrsa","sideIrsa"].forEach(function(id){ var a=$(id); if(a) a.href="#irsa"; }); var ex=$("irsaExplorerLink"); if(ex) ex.href=C.irsaExplorer; var ar=$("irsaArchivoLink"); if(ar) ar.href=C.irsaArchivo; var g=$("irsaGuiaLink"); if(g) g.href=C.irsaGuia; }
   setIrsa();
 
   /* Contadores desde el lanzamiento */
@@ -1119,7 +1120,7 @@ window.CONFIG = {
   function updateBlinkViewer(ra, dec, fov, name){
     blinkState.ra=ra; blinkState.dec=dec; blinkState.fov=fov||blinkState.fov||3; if(name) blinkState.name=name;
     var bc=$("blinkCoords"); if(bc) bc.textContent=formatRaDec(ra,dec)+(blinkState.name?" · "+blinkState.name:"");
-    var irsaA=$("blinkIrsaLink"); if(irsaA) irsaA.href="https://irsa.ipac.caltech.edu/applications/spherex/tool-spectrophotometry";
+    var irsaA=$("blinkIrsaLink"); if(irsaA) irsaA.href="#irsa";
     var svA=$("blinkSkyViewLink"); if(svA) svA.href=skyViewUrl(ra,dec,blinkState.fov,"DSS");
     /* Imagen independiente del comparador: se piden a NASA SkyView las dos
        vistas de ESTE punto (visible DSS e infrarrojo DSS2 IR) y parpadean
@@ -1167,7 +1168,7 @@ window.CONFIG = {
     var sum=$("coordSummary"), res=$("coordResult"), copy=$("coordCopy");
     if(sum) sum.textContent=(name? name+" — " : "Tu punto — ")+formatRaDec(ra,dec)+". Estos enlaces oficiales de NASA e IRSA abren exactamente ese punto:";
     if(res) res.style.display="grid";
-    var li=$("linkIrsaCoord"); if(li) li.href="https://irsa.ipac.caltech.edu/applications/spherex/tool-spectrophotometry";
+    var li=$("linkIrsaCoord"); if(li) li.href="#irsa";
     var lf=$("linkIrsaFinder"); if(lf) lf.href="https://irsa.ipac.caltech.edu/applications/finderchart/";
     var lv=$("linkSkyView"); if(lv) lv.href=skyViewUrl(ra,dec,fov,"DSS");
     var la2=$("linkIrsaArchive"); if(la2) la2.href="https://irsa.ipac.caltech.edu/cgi-bin/Gator/nph-scan?mission=irsa&submit=Select&projshort=SPHEREx";
@@ -1371,7 +1372,30 @@ window.CONFIG = {
     var f=$("spherexFrame"); if(!f) return;
     setFrameSrc(f, spherexUrl(ra, dec, fov));
     var sc=$("spherexCoords"); if(sc) sc.textContent="Punto del visor: "+(name?name+" — ":"")+formatRaDec(ra, dec)+".";
+    spherexLastRa=ra; spherexLastDec=dec;
+    checkSpherexHealth(ra, dec);
   }
+  /* ===== AVISO DE ERROR DEL VISOR DE IRSA ===== */
+  /* La ventana de IRSA es de otro dominio: esta página no puede ver qué
+     muestra dentro. Lo que sí puede comprobar es si IRSA responde: hace una
+     consulta pequeña por el mismo camino que usa la página y, si IRSA no
+     responde, muestra el aviso. Así aparece justo cuando la aplicación de
+     IRSA muestra su error TAP o su buscador no termina de cargar. */
+  var SPHEREX_API="https://spherex-explorer-api.gaaronzaid.workers.dev";
+  var spherexLastRa=83.822, spherexLastDec=-5.391;
+  function showSpherexError(){ var e=$("spherexError"); if(e) e.hidden=false; }
+  function hideSpherexError(){ var e=$("spherexError"); if(e) e.hidden=true; }
+  function checkSpherexHealth(ra, dec){
+    var ctrl=null;
+    try{ ctrl=new AbortController(); }catch(err){ ctrl=null; }
+    var to=setTimeout(function(){ if(ctrl) ctrl.abort(); }, 15000);
+    var url=SPHEREX_API+"/api/sia?collection=spherex_qr3&ra="+(ra==null?spherexLastRa:ra)+"&dec="+(dec==null?spherexLastDec:dec)+"&radius=0.01&maxrec=1";
+    fetch(url, ctrl?{signal:ctrl.signal}:{ })
+      .then(function(r){ clearTimeout(to); if(r.ok) hideSpherexError(); else showSpherexError(); })
+      .catch(function(){ clearTimeout(to); showSpherexError(); });
+  }
+  checkSpherexHealth(spherexLastRa, spherexLastDec);
+  setInterval(function(){ if(!document.hidden) checkSpherexHealth(spherexLastRa, spherexLastDec); }, 60000);
   function setFinderFrame(ra, dec, name){
     var f=$("finderFrame"); if(!f) return;
     var url=finderUrl(ra, dec);
