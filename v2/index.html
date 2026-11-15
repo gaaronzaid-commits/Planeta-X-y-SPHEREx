@@ -3,72 +3,82 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#07111f">
-<title>SPHEREx Explorer | Planet X Research — Cine del cielo con IRSA en vivo</title>
-<meta name="description" content="Explora el universo infrarrojo con SPHEREx: busca por coordenadas, ve el Cine del cielo, usa el visor oficial de IRSA y el mapa real del cielo. Datos reales de IRSA en tiempo real.">
+<meta name="theme-color" content="#04060d">
+<title>SPHEREx Explorer — Infrared Sky Observatory</title>
+<meta name="description" content="Explora el universo infrarrojo con SPHEREx: busca por coordenadas, observa cómo cambia el cielo con el tiempo y consulta los datos reales de IRSA en vivo.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+<canvas id="stars" aria-hidden="true"></canvas>
 <header>
   <div class="bar">
-    <div class="brand">✦ SPHEREx EXPLORER<small>INFRARED SKY DATA LAB · 🕵️ DETECTIVES DEL CIELO</small></div>
+    <div class="brand">SPHEREx EXPLORER<small>INFRARED SKY OBSERVATORY · NASA / IPAC IRSA</small></div>
     <div class="pill" id="status">● IRSA DATA EXPLORER</div>
   </div>
   <nav>
-    <a href="#cine">🎬 Cine del cielo</a>
-    <a href="#spherex">🛰️ Visor SPHEREx IRSA</a>
-    <a href="#mapa">🗺️ Mapa de IRSA</a>
-    <a href="#resultados">📋 Archivo</a>
-    <a href="#guia">🧒 Guía</a>
+    <a href="#cine">Cine del cielo</a>
+    <a href="#spherex">Visor SPHEREx · IRSA</a>
+    <a href="#mapa">Mapa del cielo · IRSA</a>
+    <a href="#resultados">Archivo</a>
+    <a href="#guia">Guía</a>
   </nav>
 </header>
 
 <main>
   <section class="hero">
-    <div class="kicker">✨ ASTRONOMICAL RESEARCH INTERFACE · NASA/IPAC IRSA · EN VIVO ✨</div>
-    <h1>Explore the infrared universe.<br>¡Ve cómo se mueve el cielo! 🌟</h1>
-    <p>Una plataforma de exploración astronómica para consultar observaciones infrarrojas de SPHEREx y estudiar regiones del cielo, incluyendo la investigación del hipotético Planeta X. SPHEREx fotografía todo el cielo cada 6 meses en 102 bandas: si una lucecita se mueve entre dos fotos, puede ser un asteroide, un cometa, una estrella vecina… ¡o algo nuevo!</p>
+    <div class="kicker">Astronomical Research Interface · SPHEREx · Live IRSA Data</div>
+    <h1>Explore the infrared universe. <em>Watch the sky move.</em></h1>
+    <p>SPHEREx cartografía todo el cielo cada seis meses en <strong>102 bandas del infrarrojo cercano</strong>. Asteroides, cometas, estrellas cercanas y enanas marrones se delatan porque <strong>cambian de posición entre imágenes</strong>. Busca una región del cielo, reproduce sus épocas como un video y detecta el movimiento.</p>
     <div class="steps">
-      <div class="step"><span>1️⃣</span> Elige una estrella ⭐</div>
-      <div class="step"><span>2️⃣</span> Pulsa ¡BUSCAR! 🔍</div>
-      <div class="step"><span>3️⃣</span> Dale ▶ y busca lo que salta 👀</div>
+      <div class="step"><b>01</b> Elige un objeto o unas coordenadas</div>
+      <div class="step"><b>02</b> Consulta IRSA en tiempo real</div>
+      <div class="step"><b>03</b> Reproduce el Cine y busca lo que se mueve</div>
     </div>
-    <p style="margin-top:14px"><span class="badge">🎖️ Misión 1: Barnard</span> <span class="badge">🎖️ Misión 2: WISE 0855</span> <span class="badge">🎖️ Misión 3: ¡Encuentra algo que se mueva!</span></p>
+    <div class="badges">
+      <span class="badge">Misión 01 · Barnard's Star</span>
+      <span class="badge">Misión 02 · WISE 0855</span>
+      <span class="badge">Misión 03 · Epsilon Indi B</span>
+      <span class="badge">Datos: NASA/IPAC IRSA</span>
+    </div>
   </section>
 
   <div id="msg" class="notice"></div>
 
   <div class="grid">
     <aside class="card">
-      <h2>🧭 01 / Elige a dónde mirar</h2>
-      <div class="funfact" id="funFact">💡 ¿Sabías que Plutón se descubrió porque una lucecita se movió entre dos fotos del cielo? ¡Tú puedes hacer lo mismo!</div>
-      <label for="name">Nombre del objeto (si lo sabes)</label>
+      <div class="sect-num">01 / PARÁMETROS DE BÚSQUEDA</div>
+      <h2>Elige una región del cielo</h2>
+      <div class="fact" id="funFact"><b>Dato:</b> Plutón se descubrió en 1930 porque un punto de luz se había desplazado entre dos fotografías tomadas en fechas distintas. Esa es exactamente la técnica de esta herramienta.</div>
+      <label for="name">Nombre del objeto (opcional)</label>
       <input id="name" placeholder="Ej. Barnard's Star">
       <div class="two">
-        <div><label for="ra">RA (°) ➡️</label><input id="ra" type="number" step="any" placeholder="269.452077"></div>
-        <div><label for="dec">DEC (°) ⬆️</label><input id="dec" type="number" step="any" placeholder="4.693365"></div>
+        <div><label for="ra">Ascensión recta · RA (°)</label><input id="ra" type="number" step="any" placeholder="269.452077"></div>
+        <div><label for="dec">Declinación · DEC (°)</label><input id="dec" type="number" step="any" placeholder="4.693365"></div>
       </div>
-      <p class="small">RA y DEC son la dirección de un lugar en el cielo. Pulsa una tarjeta de abajo y se llenan solos. 🪄</p>
-      <label for="radius">🔍 Campo de visión / radio de búsqueda</label>
+      <p class="small">RA y DEC son las coordenadas ecuatoriales (J2000/ICRS) de un punto del cielo. También puedes pulsar una tarjeta de objeto y se completan solas.</p>
+      <label for="radius">Campo de visión / radio de búsqueda</label>
       <select id="radius">
-        <option value="0.01">Chiquito 🔎 · 0.01° — 36″</option>
-        <option value="0.03">Pequeño · 0.03° — 1.8′</option>
-        <option value="0.05" selected>Mediano 🙂 · 0.05° — 3′</option>
-        <option value="0.1">Grande · 0.10° — 6′</option>
-        <option value="0.25">Muy grande · 0.25° — 15′</option>
-        <option value="0.5">Enorme 🐘 · 0.50° — 30′ (lento, a veces falla en IRSA)</option>
+        <option value="0.01">0.01° — 36″ de radio</option>
+        <option value="0.03">0.03° — 1.8′ de radio</option>
+        <option value="0.05" selected>0.05° — 3′ de radio</option>
+        <option value="0.1">0.10° — 6′ de radio</option>
+        <option value="0.25">0.25° — 15′ de radio</option>
+        <option value="0.5">0.50° — 30′ de radio (lento; IRSA puede fallar)</option>
       </select>
-      <label for="band">🌈 Banda del Cine (detectores SPHEREx)</label>
+      <label for="band">Banda del Cine · Detectores SPHEREx</label>
       <select id="band">
-        <option value="TODAS" selected>Todas — una foto por fecha</option>
-        <option value="SPHEREx-D1">D1 · ~0.75–1.1 µm</option>
-        <option value="SPHEREx-D2">D2 · ~1.1–1.65 µm</option>
-        <option value="SPHEREx-D3">D3 · ~1.65–2.4 µm</option>
-        <option value="SPHEREx-D4">D4 · ~2.4–3.8 µm</option>
-        <option value="SPHEREx-D5">D5 · ~3.8–4.4 µm</option>
-        <option value="SPHEREx-D6">D6 · ~4.4–5.0 µm</option>
+        <option value="TODAS" selected>Todas — un fotograma por fecha</option>
+        <option value="SPHEREx-D1">D1 · 0.75–1.1 µm</option>
+        <option value="SPHEREx-D2">D2 · 1.1–1.65 µm</option>
+        <option value="SPHEREx-D3">D3 · 1.65–2.4 µm</option>
+        <option value="SPHEREx-D4">D4 · 2.4–3.8 µm</option>
+        <option value="SPHEREx-D5">D5 · 3.8–4.4 µm</option>
+        <option value="SPHEREx-D6">D6 · 4.4–5.0 µm</option>
       </select>
-      <label>Colecciones IRSA 📚</label>
+      <label>Colecciones IRSA</label>
       <div class="checks" id="collections">
         <label><input type="checkbox" value="spherex_dr1" checked> DR1 · Wide Survey</label>
         <label><input type="checkbox" value="spherex_dr1_deep"> DR1 · Deep Survey</label>
@@ -83,137 +93,146 @@
         <option value="50">50 registros</option>
         <option value="100">100 registros</option>
       </select>
-      <button class="btn primary" id="searchBtn">🔍 ¡BUSCAR EN IRSA Y ARMAR EL CINE! 🎬</button>
-      <button class="btn" id="resetBtn" style="width:100%;margin-top:8px">↺ Volver a Barnard (ejemplo)</button>
-      <button class="btn" id="copyBtn" style="width:100%;margin-top:8px">🔗 Copiar mi enlace con estas coordenadas</button>
-      <label>⭐ Toca una tarjeta para elegir tu misión</label>
+      <button class="btn primary" id="searchBtn">Consultar IRSA y armar el Cine</button>
+      <button class="btn" id="resetBtn" style="width:100%;margin-top:8px">Restablecer a Barnard (ejemplo)</button>
+      <button class="btn" id="copyBtn" style="width:100%;margin-top:8px">Copiar enlace con estas coordenadas</button>
+      <label>Objetos de prueba</label>
       <div class="objcards">
-        <button class="obj" data-name="Barnard's Star" data-ra="269.452077" data-dec="4.693365"><b>⭐ Barnard</b><span>La estrella que más rápido se mueve. ¡Ideal para empezar!</span></button>
-        <button class="obj" data-name="Epsilon Indi B" data-ra="331.044146" data-dec="-56.782844"><b>🟤 Epsilon Indi B</b><span>Dos enanas marrones juntas. ¡Muy frías!</span></button>
-        <button class="obj" data-name="WISE 0855" data-ra="133.795125" data-dec="-7.245147"><b>🥶 WISE 0855</b><span>La enana marrón más fría que conocemos.</span></button>
-        <button class="obj" data-name="RW Aurigae" data-ra="76.956526" data-dec="30.401438"><b>💡 RW Aur</b><span>Una estrella bebé que cambia de brillo.</span></button>
-        <button class="obj" data-name="R Draconis" data-ra="248.167625" data-dec="66.754972"><b>✨ R Draconis</b><span>Una estrella que late cada 245 días.</span></button>
+        <button class="obj" data-name="Barnard's Star" data-ra="269.452077" data-dec="4.693365"><b>Barnard's Star</b><span>La estrella con mayor movimiento propio conocido. Ideal para empezar.</span></button>
+        <button class="obj" data-name="Epsilon Indi B" data-ra="331.044146" data-dec="-56.782844"><b>Epsilon Indi B</b><span>Par de enanas marrones orbitando una estrella cercana.</span></button>
+        <button class="obj" data-name="WISE 0855" data-ra="133.795125" data-dec="-7.245147"><b>WISE 0855</b><span>La enana marrón más fría conocida; movimiento rápido.</span></button>
+        <button class="obj" data-name="RW Aurigae" data-ra="76.956526" data-dec="30.401438"><b>RW Aurigae</b><span>Estrella variable joven; busca cambios de brillo.</span></button>
+        <button class="obj" data-name="R Draconis" data-ra="248.167625" data-dec="66.754972"><b>R Draconis</b><span>Variable Mira de periodo 245.6 días.</span></button>
       </div>
     </aside>
 
     <section class="stack">
       <div class="stats">
-        <div class="stat"><small>📸 FOTOS ENCONTRADAS</small><strong id="total">—</strong></div>
-        <div class="stat"><small>📚 COLECCIONES</small><strong id="ncol">—</strong></div>
-        <div class="stat"><small>📡 ESTADO</small><strong id="state" style="font-size:15px">EN ESPERA</strong></div>
+        <div class="stat"><small>REGISTROS ENCONTRADOS</small><strong id="total">—</strong></div>
+        <div class="stat"><small>COLECCIONES CONSULTADAS</small><strong id="ncol">—</strong></div>
+        <div class="stat"><small>ESTADO DE CONSULTA</small><strong id="state" style="font-size:15px">EN ESPERA</strong></div>
       </div>
 
       <section class="card">
-        <h3>📡 Datos en vivo de IRSA</h3>
-        <div id="live" class="notice">Sin búsqueda todavía. Los datos llegan en tiempo real desde IRSA cuando pulsas ¡BUSCAR! No hay fotos guardadas de antes.</div>
+        <div class="sect-num">DATOS EN VIVO</div>
+        <h3>IRSA en tiempo real</h3>
+        <div id="live" class="notice">Sin consulta todavía. Los datos se obtienen en tiempo real desde IRSA al pulsar la búsqueda. No hay observaciones precargadas.</div>
         <p class="small" id="liveMeta">Fuente: NASA/IPAC IRSA · SPHEREx · Última consulta: —</p>
       </section>
 
       <section class="card" id="cine">
-        <h3>🎬 02 / Cine del cielo — ¡dale Play!</h3>
-        <p class="small">Cada botón es una foto de una fecha distinta, de verdad, de IRSA. <strong>▶ Play</strong> las pasa como un video. <strong>◐ Parpadeo</strong> salta entre la primera y la última foto: ¡si algo se mueve, lo verás saltar! 👀 Es comparación visual, no una resta de píxeles del servidor.</p>
+        <div class="sect-num">02 / LÍNEA DE TIEMPO</div>
+        <h3>Cine del cielo — Play y Parpadeo</h3>
+        <p class="small">Cada fotograma es una fecha distinta devuelta por IRSA para este centro. <strong>Play</strong> recorre las fechas en orden. <strong>Parpadeo</strong> alterna entre la primera y la última época: un objeto en movimiento parecerá saltar; uno variable parecerá encenderse y apagarse. Es comparación visual, no una resta de píxeles calculada en el servidor.</p>
         <div class="controls">
-          <button class="btn" id="playBtn" disabled>▶ Play 🎬</button>
+          <button class="btn" id="playBtn" disabled>▶ Play</button>
           <button class="btn" id="pauseBtn" disabled>⏸ Pausa</button>
-          <button class="btn" id="blinkBtn" disabled>◐ Parpadeo ✨</button>
+          <button class="btn" id="blinkBtn" disabled>◐ Parpadeo · 1ª ↔ última</button>
           <button class="btn" id="prevBtn" disabled>‹ Anterior</button>
           <button class="btn" id="nextBtn" disabled>Siguiente ›</button>
-          <label style="margin:0">Velocidad 🐢🐇 <input type="range" id="speed" min="400" max="3000" step="100" value="1200"> <span id="speedLabel">1.2 s</span></label>
+          <label style="margin:0">Velocidad <input type="range" id="speed" min="400" max="3000" step="100" value="1200"> <span id="speedLabel">1.2 s</span></label>
         </div>
-        <div class="timeline" id="timeline"><span class="small">Haz una búsqueda para construir la línea de tiempo con las fechas reales de IRSA. 🗓️</span></div>
+        <div class="timeline" id="timeline"><span class="small">Realiza una consulta para construir la línea de tiempo con las fechas reales de IRSA.</span></div>
         <div class="mono" id="frameInfo">Fotograma: —</div>
         <div id="bands" style="margin-top:14px"></div>
         <p class="small" id="frameCount">Sin fotogramas todavía</p>
       </section>
 
       <section class="card" id="spherex">
-        <h3>🛰️ 03 / Visor oficial SPHEREx de IRSA — imágenes espectrales</h3>
-        <p class="small">Esta es la aplicación oficial de IRSA para SPHEREx (búsqueda de imágenes espectrales), dentro de esta página. Cuando pulsas ¡BUSCAR!, este visor también viaja a tus coordenadas. Si IRSA impide mostrarlo dentro de la ventana, usa “Abrir IRSA completo”. Datos: NASA/IPAC IRSA.</p>
+        <div class="sect-num">03 / APLICACIÓN OFICIAL IRSA</div>
+        <h3>Visor SPHEREx de IRSA — Imágenes espectrales</h3>
+        <p class="small">Aplicación oficial de IRSA para SPHEREx (búsqueda de imágenes espectrales), incrustada en esta página. Al pulsar la búsqueda, este visor también se centra en tus coordenadas. Si IRSA impide mostrarlo dentro de la ventana, usa “Abrir IRSA completo”.</p>
         <div class="controls">
-          <button class="btn primary" id="spherexSearchBtn" style="width:auto;margin-top:0">🚀 RUN IRSA SEARCH</button>
-          <button class="btn" id="spherexOpenBtn">↗ OPEN FULL IRSA</button>
+          <button class="btn primary" id="spherexSearchBtn" style="width:auto;margin-top:0">Run IRSA Search</button>
+          <button class="btn" id="spherexOpenBtn">Open Full IRSA ↗</button>
         </div>
         <div class="viewer-info"><span>DATA SOURCE: NASA/IPAC INFRARED SCIENCE ARCHIVE</span><span id="coordinates">RA: — | DEC: —</span></div>
         <div class="iframe-container">
           <iframe id="spherexViewer" title="SPHEREx Data Explorer - IRSA" src="https://irsa.ipac.caltech.edu/applications/spherex/?api=spectral-images&ra=269.452077&dec=4.693365&sr=0.05d" allowfullscreen></iframe>
         </div>
-        <div class="notice"><strong>Importante:</strong> el visor usa la aplicación oficial de IRSA. Si el servidor de IRSA impide mostrarla dentro de esta ventana por sus políticas de seguridad, usa el botón OPEN FULL IRSA. Las consultas dependen de la disponibilidad del archivo.</div>
+        <div class="notice"><strong>Importante:</strong> el visor utiliza la aplicación oficial de IRSA. Si el servidor de IRSA impide mostrarla dentro de esta ventana por sus políticas de seguridad, usa el botón Open Full IRSA. Las consultas dependen de la disponibilidad del archivo.</div>
       </section>
 
       <section class="card" id="mapa">
-        <h3>🗺️ 04 / Mapa real del cielo de IRSA — ¡tú pones las coordenadas!</h3>
-        <p class="small">El mapa de verdad de IRSA (IRSA Viewer y Finder Chart). Escribe RA y DEC y pulsa <strong>Ver en el mapa 🗺️</strong>. También puedes escribir las coordenadas directamente dentro del mapa.</p>
+        <div class="sect-num">04 / MAPA INTERACTIVO</div>
+        <h3>Mapa real del cielo · IRSA Viewer y Finder Chart</h3>
+        <p class="small">El mapa interactivo de IRSA. Escribe RA y DEC y pulsa “Ver en el mapa”: el mapa se centrará en ese punto. También puedes introducir coordenadas directamente dentro del mapa.</p>
         <div class="two">
           <div><label for="mapRa">RA (°) para el mapa</label><input id="mapRa" type="number" step="any" placeholder="269.452077"></div>
           <div><label for="mapDec">DEC (°) para el mapa</label><input id="mapDec" type="number" step="any" placeholder="4.693365"></div>
         </div>
         <p>
-          <button class="btn primary" id="mapBtn" style="width:auto">🗺️ Ver en el mapa de IRSA</button>
+          <button class="btn primary" id="mapBtn" style="width:auto">Ver en el mapa de IRSA</button>
           <a class="btn" href="https://irsa.ipac.caltech.edu/irsaviewer/" target="_blank" rel="noopener" style="text-decoration:none">Abrir IRSA Viewer ↗</a>
           <a class="btn" href="https://irsa.ipac.caltech.edu/applications/finderchart/" target="_blank" rel="noopener" style="text-decoration:none">Abrir Finder Chart ↗</a>
         </p>
         <div class="maptabs">
-          <button class="btn on" id="tabViewer">🌌 IRSA Viewer (mapa)</button>
-          <button class="btn" id="tabFinder">🔭 Finder Chart (fotos)</button>
+          <button class="btn on" id="tabViewer">IRSA Viewer · Mapa</button>
+          <button class="btn" id="tabFinder">Finder Chart · Imágenes</button>
         </div>
         <iframe class="irsa" id="mapViewer" title="Mapa interactivo IRSA Viewer" src="https://irsa.ipac.caltech.edu/irsaviewer/"></iframe>
         <iframe class="irsa" id="mapFinder" title="Finder Chart de IRSA" src="https://irsa.ipac.caltech.edu/applications/finderchart/" style="display:none"></iframe>
-        <p class="small" id="mapNote">Mapa actual: IRSA Viewer, todo el cielo. Escribe unas coordenadas arriba para viajar a un lugar. 🧭</p>
+        <p class="small" id="mapNote">Mapa actual: IRSA Viewer, todo el cielo. Introduce unas coordenadas para viajar a una región.</p>
       </section>
 
       <section class="card" id="resultados">
-        <h3>📋 05 / Resultados del archivo</h3>
-        <p><button class="btn" id="csvBtn" disabled>↓ Exportar CSV 📥</button></p>
+        <div class="sect-num">05 / ARCHIVO</div>
+        <h3>Resultados de archivo</h3>
+        <p><button class="btn" id="csvBtn" disabled>↓ Exportar CSV</button></p>
         <div class="tablewrap"><table>
-          <thead><tr><th>📸 FOTO</th><th>OBJETO</th><th>COLECCIÓN</th><th>BANDA</th><th>FECHA</th><th>CENTRO DE LA FOTO RA / DEC</th><th></th></tr></thead>
-          <tbody id="rows"><tr><td colspan="7" style="text-align:center;color:#5a6b8c;padding:28px">Haz una búsqueda para ver las fotos que encontró IRSA. 🔍</td></tr></tbody>
+          <thead><tr><th>Observación</th><th>Objeto</th><th>Colección</th><th>Banda</th><th>Fecha</th><th>Centro de exposición RA / DEC</th><th></th></tr></thead>
+          <tbody id="rows"><tr><td colspan="7" style="text-align:center;color:#94a7c2;padding:28px">Configura una búsqueda para consultar el archivo SPHEREx.</td></tr></tbody>
         </table></div>
-        <p class="small" id="note">RA / DEC de la tabla es el centro de cada foto grande de SPHEREx (s_ra / s_dec de IRSA), no el lugar exacto de una estrellita. La foto cubre un pedazo enorme del cielo. 🌌</p>
+        <p class="small" id="note">RA / DEC de la tabla es el centro de cada exposición SPHEREx (s_ra / s_dec de IRSA), no la posición exacta de una fuente en el punto consultado. Cada exposición cubre unos 3.5° de cielo.</p>
       </section>
 
       <section class="card" id="visor">
-        <h3>🔎 06 / Visor de imágenes FITS</h3>
+        <div class="sect-num">06 / VISOR FITS</div>
+        <h3>Visor de imágenes FITS</h3>
         <p>
-          <button class="btn" id="cutoutBtn" disabled>✂️ Crear recorte</button>
-          <button class="btn" id="fitsBtn" disabled>📂 Abrir FITS</button>
+          <button class="btn" id="cutoutBtn" disabled>Crear recorte</button>
+          <button class="btn" id="fitsBtn" disabled>Abrir FITS</button>
         </p>
-        <div class="viewer" id="viewer"><div class="empty"><div><div style="font-size:40px">⌁</div><strong>Visor astronómico</strong><p>Elige una foto de la tabla o del Cine para verla aquí. 🔭</p></div></div></div>
-        <p class="small" id="viewerInfo">El visor usa JS9. Las fotos son de verdad, de IRSA. A veces tardan un poco en cargar. ⏳</p>
+        <div class="viewer" id="viewer"><div class="empty"><div><div style="font-size:40px">⌁</div><strong>Visor astronómico</strong><p>Selecciona una observación de la tabla o un fotograma del Cine para cargar su archivo FITS.</p></div></div></div>
+        <p class="small" id="viewerInfo">El visor utiliza JS9 para interpretar archivos FITS. Los datos proceden del archivo IRSA, no de imágenes de muestra.</p>
       </section>
 
       <section class="card">
-        <h3>ℹ️ 07 / Información de la foto elegida</h3>
-        <div id="details" class="notice">Aún no has elegido ninguna foto. 🤔</div>
+        <div class="sect-num">07 / PRODUCTO SELECCIONADO</div>
+        <h3>Información del producto</h3>
+        <div id="details" class="notice">Aún no hay una observación seleccionada.</div>
       </section>
 
       <section class="card" id="irsa">
-        <h3>⬢ 08 / IRSA en vivo — el archivo, dentro de esta página</h3>
-        <p class="small">Documentación oficial de SPHEREx en IRSA, incrustada aquí. Todos los datos de esta página vienen solo de IRSA.</p>
+        <div class="sect-num">08 / ARCHIVO EN VIVO</div>
+        <h3>IRSA en vivo — documentación del archivo</h3>
+        <p class="small">Documentación oficial de SPHEREx en IRSA, incrustada en esta página. Todos los datos mostrados proceden únicamente de IRSA.</p>
         <p>
           <a class="btn" href="https://irsa.ipac.caltech.edu/spherex-archive-documentation/" target="_blank" rel="noopener" style="text-decoration:none">Abrir documentación IRSA ↗</a>
-          <button class="btn" id="healthBtn">✅ Comprobar si IRSA está despierto</button>
+          <button class="btn" id="healthBtn">Comprobar estado del servicio</button>
         </p>
         <div id="health" class="notice" style="display:none"></div>
         <iframe class="irsa" title="Documentación del archivo SPHEREx en IRSA" src="https://irsa.ipac.caltech.edu/spherex-archive-documentation/"></iframe>
       </section>
 
       <section class="card" id="guia">
-        <h3>🧒 09 / Guía para detectives del cielo</h3>
+        <div class="sect-num">09 / GUÍA Y OBJETIVOS</div>
+        <h3>Guía de observación</h3>
         <div class="cards">
-          <div class="info"><h4>1 · Busca lo que se mueve 👀</h4><p>Compara la misma zona en dos fechas. Un asteroide se mueve, una estrella vecina camina despacio y una variable se enciende y se apaga. 💡</p></div>
-          <div class="info"><h4>2 · 102 colores invisibles 🌈</h4><p>SPHEREx ve en 102 bandas del infrarrojo, en 6 detectores (D1–D6). Debajo del Cine verás los colores reales que IRSA te devolvió.</p></div>
-          <div class="info"><h4>3 · Tus misiones ⭐</h4><p class="mono">Barnard · 269.452077, +4.693365<br>Epsilon Indi B · 331.044146, −56.782844<br>WISE 0855 · 133.795125, −7.245147<br>RW Aur · 76.956526, +30.401438<br>R Dra · 248.167625, +66.754972</p><p style="margin-top:8px">Empieza por Barnard y WISE 0855. 🏁</p></div>
-          <div class="info"><h4>4 · Palabras de astrónomo 🧑‍🚀</h4><p><span class="mono">t_min</span> = fecha de la foto. <span class="mono">s_ra / s_dec</span> = centro de la foto. <span class="mono">em_min / em_max</span> = color de la banda. 🎓</p></div>
-          <div class="info"><h4>5 · Cosas que debes saber 🤔</h4><p>SPHEREx vuelve a cada lugar cada 6 meses. Con zonas muy grandes IRSA puede tardar o fallar: mejor usa zonas medianas.</p></div>
-          <div class="info"><h4>6 · Si encuentras algo raro 🎉</h4><p>Guarda tu enlace con coordenadas, descarga el CSV y anota la fecha y el nombre de la foto. Si se mueve igual en 3 o más fechas… ¡cuéntaselo a un adulto y a un astrónomo! 📣</p></div>
+          <div class="info"><h4>01 · Busca movimiento</h4><p>Compara la misma zona en dos fechas. Un asteroide se desplaza entre épocas; una estrella cercana avanza poco a poco; una variable cambia de brillo. Anota fecha, obs_id y banda antes de concluir nada.</p></div>
+          <div class="info"><h4>02 · Las 102 bandas</h4><p>SPHEREx observa en 102 bandas del infrarrojo cercano, agrupadas en 6 detectores (D1–D6). Bajo el Cine verás la cobertura real en longitud de onda (em_min–em_max) que IRSA devolvió para tu búsqueda.</p></div>
+          <div class="info"><h4>03 · Objetos de prueba</h4><p class="mono">Barnard · 269.452077, +4.693365<br>Epsilon Indi B · 331.044146, −56.782844<br>WISE 0855 · 133.795125, −7.245147<br>RW Aur · 76.956526, +30.401438<br>R Dra · 248.167625, +66.754972</p><p style="margin-top:8px">Empieza por Barnard y WISE 0855, los de mayor movimiento propio.</p></div>
+          <div class="info"><h4>04 · Lee los metadatos</h4><p><span class="mono">t_min</span> es la fecha de la exposición, aquí en calendario con su MJD original. <span class="mono">s_ra / s_dec</span> es el centro de la exposición. <span class="mono">em_min / em_max</span> es el rango de longitud de onda de la banda.</p></div>
+          <div class="info"><h4>05 · Límites honestos</h4><p>SPHEREx revisita cada zona cada ~6 meses; la línea de tiempo depende de lo publicado en IRSA. Con radios grandes IRSA puede tardar o fallar. Un movimiento menor que un píxel (6.15″) no se verá saltar entre dos épocas.</p></div>
+          <div class="info"><h4>06 · Si ves algo inusual</h4><p>Guarda el enlace con coordenadas, exporta el CSV y anota obs_id, fecha y banda. Si el punto se desplaza de forma coherente en tres o más épocas, merece una segunda revisión.</p></div>
         </div>
-        <h3 style="margin-top:22px">🪐 Planet X | Research objectives</h3>
-        <p class="small">Líneas de investigación para el estudio de posibles objetos astronómicos mediante observaciones infrarrojas. El Planeta X es hipotético: aquí se buscan candidatos, no se afirma que exista.</p>
+        <h3 style="margin-top:24px">Planet X · Research objectives</h3>
+        <p class="small">Líneas de investigación para el estudio de posibles objetos astronómicos mediante observaciones infrarrojas. El Planeta X es hipotético: aquí se buscan candidatos, no se afirma su existencia.</p>
         <div class="cards">
-          <div class="info"><h4>01. Infrared observations</h4><p>Examinar imágenes y observaciones espectrales para identificar fuentes astronómicas de interés.</p></div>
-          <div class="info"><h4>02. Coordinate analysis</h4><p>Consultar diferentes regiones del cielo con coordenadas ecuatoriales RA y DEC.</p></div>
-          <div class="info"><h4>03. Object investigation</h4><p>Investigar posibles candidatos y estudiar sus características observacionales.</p></div>
-          <div class="info"><h4>04. Scientific verification</h4><p>Contrastar los resultados con observaciones y catálogos astronómicos independientes.</p></div>
+          <div class="info"><h4>01 · Infrared observations</h4><p>Examinar imágenes y observaciones espectrales para identificar fuentes astronómicas de interés.</p></div>
+          <div class="info"><h4>02 · Coordinate analysis</h4><p>Consultar diferentes regiones del cielo utilizando coordenadas ecuatoriales RA y DEC.</p></div>
+          <div class="info"><h4>03 · Object investigation</h4><p>Investigar posibles candidatos y estudiar sus características observacionales.</p></div>
+          <div class="info"><h4>04 · Scientific verification</h4><p>Contrastar los resultados con observaciones y catálogos astronómicos independientes.</p></div>
         </div>
       </section>
     </section>
@@ -222,10 +241,29 @@
 
 <footer>
   <strong>SPHEREx EXPLORER</strong><br>
-  Independent astronomical research interface · Hecho para que cualquier niño o niña pueda ser detective del cielo 🌟<br>
-  Data source: NASA/IPAC Infrared Science Archive (IRSA)<br>
+  Independent astronomical research interface · Data source: NASA/IPAC Infrared Science Archive (IRSA)<br>
   This is an independent research interface and is not an official NASA or SPHEREx mission product.
 </footer>
+<script>
+/* Campo de estrellas realista generado en el lienzo de fondo. */
+(function(){
+  var c=document.getElementById("stars"); if(!c) return;
+  var x=c.getContext("2d"), W, H, stars=[];
+  function size(){ W=c.width=innerWidth; H=c.height=innerHeight;
+    stars=[]; var n=Math.floor(W*H/9000);
+    for(var i=0;i<n;i++) stars.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.3+.3,a:Math.random()*.7+.15,tw:Math.random()*1.5+.3});
+  }
+  function draw(t){
+    x.clearRect(0,0,W,H);
+    var g=x.createLinearGradient(0,0,0,H); g.addColorStop(0,"#04060d"); g.addColorStop(.5,"#060b18"); g.addColorStop(1,"#04060d");
+    x.fillStyle=g; x.fillRect(0,0,W,H);
+    for(var i=0;i<stars.length;i++){ var s=stars[i], a=s.a*(0.65+0.35*Math.sin(t/1000*s.tw+i));
+      x.globalAlpha=a; x.fillStyle="#dbeafe"; x.beginPath(); x.arc(s.x,s.y,s.r,0,6.283); x.fill(); }
+    x.globalAlpha=1; requestAnimationFrame(draw);
+  }
+  addEventListener("resize",size); size(); requestAnimationFrame(draw);
+})();
+</script>
 <script src="app.js"></script>
 </body>
 </html>

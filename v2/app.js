@@ -92,11 +92,11 @@ function loadFromURL() {
 
 /* ---- Datos curiosos y mapa real de IRSA ---- */
 const FUNFACTS = {
-  "Barnard's Star": "💡 ¡Barnard es la estrella que más rápido se mueve en el cielo! En un año camina tanto como el ancho de la Luna llena visto desde la Tierra. 🌕",
-  "Epsilon Indi B": "💡 ¡Epsilon Indi B son en realidad DOS enanas marrones bailando juntas alrededor de una estrella! Son tan frías que no brillan como el Sol. 🟤🟤",
-  "WISE 0855": "💡 ¡WISE 0855 es la enana marrón más fría que conocemos! Está a unos -13 °C… ¡más fría que un congelador! 🥶",
-  "RW Aurigae": "💡 ¡RW Aur es una estrella bebé que cambia de brillo porque tiene polvo a su alrededor, como si se pusiera gafas de sol! 😎",
-  "R Draconis": "💡 ¡R Draconis late como un corazón gigante: se hace grande y brillante, luego chiquita, cada 245 días! ❤️"
+  "Barnard's Star": "Dato: Barnard's Star tiene el mayor movimiento propio conocido: unos 10.3 segundos de arco por año, el equivalente al diámetro aparente de la Luna llena en unos 180 años.",
+  "Epsilon Indi B": "Dato: Epsilon Indi B es en realidad un par de enanas marrones (Ba y Bb) en órbita mutua, compañeras de la estrella Epsilon Indi A.",
+  "WISE 0855": "Dato: WISE 0855 es una de las enanas marrones más frías conocidas, con una temperatura de unos 250 K y un movimiento propio de unos 8 segundos de arco por año.",
+  "RW Aurigae": "Dato: RW Aurigae es una estrella joven cuya variabilidad se asocia a material circunestelar que oscurece su luz de forma irregular.",
+  "R Draconis": "Dato: R Draconis es una variable Mira con un periodo de unos 245.6 días, con un brillo que varía en varias magnitudes."
 };
 function showFunFact(name) {
   if (FUNFACTS[name]) $("funFact").textContent = FUNFACTS[name];
@@ -109,12 +109,12 @@ function finderURL(ra, dec) {
 function goToMap() {
   const ra = $("mapRa").value.trim() || $("ra").value.trim();
   const dec = $("mapDec").value.trim() || $("dec").value.trim();
-  if (!ra || !dec) { msg("Escribe RA y DEC para viajar en el mapa. 🗺️", ""); return; }
+  if (!ra || !dec) { msg("Escribe RA y DEC para centrar el mapa.", ""); return; }
   $("mapRa").value = ra; $("mapDec").value = dec;
   $("mapFinder").src = finderURL(ra, dec);
-  $("mapNote").textContent = `🗺️ Mapa centrado en RA ${ra}°, DEC ${dec}°. Si el mapa no carga dentro de la página, ábrelo con los botones de arriba, ¡es el mapa real de IRSA!`;
+  $("mapNote").textContent = `Mapa centrado en RA ${ra}°, DEC ${dec}°. Si el mapa no carga dentro de la página, ábrelo con los botones de arriba: es el mapa real de IRSA.`;
   showMapTab("finder");
-  msg(`¡Viajando en el mapa de IRSA a RA ${ra}°, DEC ${dec}°! 🚀`, "good");
+  msg(`Centrando el mapa de IRSA en RA ${ra}°, DEC ${dec}°.`, "good");
 }
 function showMapTab(which) {
   const v = which === "viewer";
