@@ -279,7 +279,7 @@ body.editing .edit-banner{display:block}
 /* Mapa real del cielo — IRSA Viewer y Finder Chart */
 .map-tabs{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px}
 .map-frame{border:1px solid var(--linea);border-radius:16px;overflow:hidden;background:#000}
-.map-frame iframe{display:block;width:100%;height:min(68vh,640px);border:0;background:#050a1e}
+.map-frame iframe{display:block;width:100%;height:min(88vh,960px);border:0;background:#050a1e}
 .map-note{background:rgba(255,123,28,.09);border:1px solid var(--naranja-osc);border-radius:10px;padding:12px 16px;margin:0 0 14px;color:var(--texto-suave)}
 .map-note strong{color:var(--texto)}
 .map-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
@@ -399,6 +399,17 @@ window.CONFIG = {
       <div class="stat" role="listitem"><b id="diasDesde">—</b><span>días desde el lanzamiento (11 mar 2025)</span></div>
       <div class="stat" role="listitem"><b id="orbitasEst">—</b><span>vueltas a la Tierra, aprox. (14,5 al día)</span></div>
     </div>
+  </div>
+</section>
+
+<section id="visor-spherex">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2 data-editable>Visor SPHEREx de IRSA — Imágenes espectrales</h2>
+      <p data-editable>La aplicación oficial de SPHEREx en IRSA, dentro de esta página. Aquí ves las imágenes espectrales reales del telescopio, tal como las publica la NASA.</p>
+    </div>
+    <div class="map-frame"><iframe title="Visor SPHEREx de IRSA — Imágenes espectrales" src="https://irsa.ipac.caltech.edu/applications/spherex/?api=spectral-images&amp;ra=83.822&amp;dec=-5.391&amp;sr=1d" loading="lazy" allowfullscreen></iframe></div>
+    <p style="color:var(--texto-suave);font-size:.93rem;margin-top:14px">Fuente: NASA/IPAC IRSA — aplicación oficial de SPHEREx. Si el visor tarda en cargar, espera unos segundos: es la aplicación de IRSA trabajando.</p>
   </div>
 </section>
 
@@ -664,9 +675,6 @@ window.CONFIG = {
     </div>
     <div data-mpanel="viewer">
       <div class="map-frame"><iframe title="IRSA Viewer — mapa interactivo del cielo de IRSA" src="https://irsa.ipac.caltech.edu/irsaviewer/" loading="lazy" allowfullscreen></iframe></div>
-      <div class="map-actions">
-        <a class="btn btn-ghost" href="https://irsa.ipac.caltech.edu/irsaviewer/" target="_blank" rel="noopener">Abrir IRSA Viewer en una pestaña nueva ↗</a>
-      </div>
     </div>
     <div data-mpanel="finder" hidden>
       <div class="map-frame"><iframe id="finderFrame" title="Finder Chart de IRSA — fotos del cielo del punto elegido" src="https://irsa.ipac.caltech.edu/applications/finderchart/servlet/api?mode=getResult&amp;locstr=83.822%20-5.391" loading="lazy" allowfullscreen></iframe></div>
