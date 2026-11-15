@@ -1,20 +1,18 @@
-/* SPHEREx Explorer — Cine del cielo. Archivo nuevo, desde cero.
-   Fuente única de datos: NASA/IPAC IRSA, vía Cloudflare Worker. */
+/* SPHEREx Explorer — versión sencilla.
+   Fuente única de datos: NASA/IPAC IRSA, vía Cloudflare Worker.
+   Sin Cine ni tablas: la búsqueda centra el visor oficial y el mapa,
+   y muestra en palabras sencillas en qué fechas SPHEREx fotografió la zona. */
 const API_BASE = "https://spherex-explorer-api.gaaronzaid.workers.dev";
+const COLLECTIONS = ["spherex_dr1", "spherex_qr3"];
+const MAXREC = 25;
 
 const $ = (id) => document.getElementById(id);
-let rows = [];          // registros SIA devueltos por IRSA
-let frames = [];       // un fotograma por fecha distinta
-let frameIdx = 0;
-let selected = null;
-let playTimer = null;
-let blinkTimer = null;
-let blinkSide = false;
+let rows = []; // registros SIA devueltos por IRSA (solo se usan sus fechas)
 
 const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const val = (o, ...keys) => { for (const k of keys) if (o[k] !== undefined && o[k] !== null && o[k] !== "") return o[k]; return "—"; };
 const mjdDate = (v) => { const m = Number(v); if (!Number.isFinite(m)) return null; const d = new Date(Date.UTC(1858, 10, 17) + m * 86400000); return isNaN(d) ? null : d; };
-const fmtMJD = (v) => { const d = mjdDate(v); if (!d) return String(v ?? "—"); return d.toISOString().slice(0, 10) + " " + d.toISOString().slice(11, 16) + " UTC (MJD " + v + ")"; };
+const fmtFecha = (d) => d.toLocaleDateString("es-MX", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
 
 function msg(text, kind = "") {
   const box = $("msg"); box.textContent = text; box.className = "notice " + kind; box.style.display = "block";
@@ -46,13 +44,11 @@ async function resolveName(name) {
   if (!r.ok) throw new Error("No se pudo resolver ese nombre.");
   return r.json();
 }
-function live(state, ra, dec, radius, count, colls) {
+function live(state) {
   const when = new Date().toLocaleString("es-MX", { timeZone: "America/Mexico_City" });
-  $("live").textContent =
-    state === "ok" ? `Consulta completada en tiempo real desde IRSA. Se recibieron ${count} registros.` :
-    state === "error" ? "La última consulta a IRSA falló. Intenta de nuevo." :
-    "Consultando IRSA en tiempo real…";
-  $("liveMeta").textContent = `Fuente: NASA/IPAC IRSA · SPHEREx · Última consulta: ${when} (hora de México) · Centro: RA ${ra}°, DEC ${dec}° · Radio ${radius}° · Colecciones: ${colls}`;
+  $("liveMeta").textContent = `Fuente: NASA/IPAC IRSA · SPHEREx · Última consulta: ${when} (hora de México)`;
+  if (state === "loading") $("live").textContent = "Consultando IRSA en tiempo real…";
+  else if (state === "error") $("live").textContent = "La última consulta a IRSA falló. Intenta de nuevo más tarde.";
 }
 function shareURL() {
   const ra = $("ra").value.trim(), dec = $("dec").value.trim();
@@ -62,7 +58,8 @@ function shareURL() {
   const n = $("name").value.trim(); if (n) u.searchParams.set("name", n);
   history.replaceState(null, "", u.toString());
 }
-/* ---- Visor oficial SPHEREx de IRSA (esencial del código enviado) ---- */
+
+/* ---- Visor oficial SPHEREx de IRSA ---- */
 const SPHEREX_APP = "https://irsa.ipac.caltech.edu/applications/spherex/";
 function spherexAppURL(ra, dec, radius) {
   const p = new URLSearchParams({ api: "spectral-images", ra: ra, dec: dec, sr: radius + "d" });
@@ -123,78 +120,18 @@ function showMapTab(which) {
   $("tabFinder").classList.toggle("on", !v);
 }
 
-/* ---- Cine: fotogramas, Play, Parpadeo ---- */
-function stopCine() {
-  if (playTimer) { clearInterval(playTimer); playTimer = null; }
-  if (blinkTimer) { clearInterval(blinkTimer); blinkTimer = null; }
-  blinkSide = false;
-  $("playBtn").classList.remove("on"); $("blinkBtn").classList.remove("on");
-  $("pauseBtn").disabled = true;
-}
-function buildFrames() {
-  stopCine(); frames = []; frameIdx = 0;
-  const band = $("band").value;
-  const byDate = new Map();
-  rows.forEach((o) => {
-    const d = mjdDate(val(o, "t_min"));
-    if (!d) return;
-    if (band !== "TODAS" && val(o, "energy_bandpassname") !== band) return;
-    const key = d.toISOString().slice(0, 10);
-    if (!byDate.has(key)) byDate.set(key, []);
-    byDate.get(key).push(o);
-  });
-  frames = [...byDate.keys()].sort().map((date) => {
-    const list = byDate.get(date);
-    return { date, obs: list[0], count: list.length };
-  });
-  renderTimeline(); renderBands();
-  const has = frames.length > 0;
-  $("playBtn").disabled = frames.length < 2; $("blinkBtn").disabled = frames.length < 2;
-  $("prevBtn").disabled = !has; $("nextBtn").disabled = !has;
-  $("frameCount").textContent = has
-    ? `${frames.length} fotogramas · ${frames[0].date} → ${frames[frames.length - 1].date}`
-    : "Sin fotogramas para esta banda y estas fechas";
-  if (has) showFrame(0, true); else $("frameInfo").textContent = "Fotograma: —";
-}
-function renderTimeline() {
-  const tl = $("timeline"); tl.innerHTML = "";
-  if (!frames.length) { tl.innerHTML = '<span class="small">Haz una consulta para construir la línea de tiempo con las fechas reales de IRSA.</span>'; return; }
-  frames.forEach((f, i) => {
-    const b = document.createElement("button");
-    b.innerHTML = `${i + 1}. ${esc(f.date)}<small>${esc(val(f.obs, "energy_bandpassname"))} · ${esc(val(f.obs, "obs_id"))} · ${f.count} reg.</small>`;
-    if (i === frameIdx) b.classList.add("on");
-    b.addEventListener("click", () => { stopCine(); showFrame(i, true); });
-    tl.appendChild(b);
-  });
-}
-function showFrame(i, loadViewer) {
-  if (!frames.length) return;
-  frameIdx = ((i % frames.length) + frames.length) % frames.length;
-  const f = frames[frameIdx];
-  document.querySelectorAll("#timeline button").forEach((b, j) => b.classList.toggle("on", j === frameIdx));
-  $("frameInfo").textContent = `Fotograma ${frameIdx + 1} / ${frames.length} · ${f.date} · ${val(f.obs, "energy_bandpassname")} · ${val(f.obs, "obs_id")} · ${f.obs._collection || "—"} · Centro exp. ${val(f.obs, "s_ra")} / ${val(f.obs, "s_dec")}`;
-  if (loadViewer) {
-    const idx = rows.indexOf(f.obs);
-    if (idx >= 0) selectRow(idx);
-  }
-}
-function renderBands() {
-  const box = $("bands");
-  const seen = new Map();
-  rows.forEach((o) => {
-    const b = val(o, "energy_bandpassname");
-    if (b === "—" || seen.has(b)) return;
-    const lo = Number(val(o, "em_min")) * 1e6, hi = Number(val(o, "em_max")) * 1e6;
-    if (Number.isFinite(lo) && Number.isFinite(hi)) seen.set(b, { lo, hi });
-  });
-  if (!seen.size) { box.innerHTML = ""; return; }
-  box.innerHTML = "<h4 style='margin:0 0 8px;font-size:13px'>Cobertura espectral real de esta búsqueda (IRSA: em_min–em_max)</h4>" +
-    "<p class='small'>Cada banda es un rango de longitud de onda devuelto por IRSA. No es un espectro de flujo: la tabla SIA no devuelve flujo.</p>" +
-    [...seen.entries()].sort((a, b) => a[1].lo - b[1].lo).map(([b, r]) => {
-      const left = Math.min(95, Math.max(0, (r.lo - 0.7) / 4.4 * 100)).toFixed(1);
-      const w = Math.max(2, Math.min(100 - Number(left), (r.hi - r.lo) / 4.4 * 100)).toFixed(1);
-      return `<div style="font-size:12px"><strong>${esc(b)}</strong> · ${r.lo.toFixed(2)}–${r.hi.toFixed(2)} µm<div class="bandbar"><i style="left:${left}%;width:${w}%"></i></div></div>`;
-    }).join("");
+/* ---- Fechas en palabras sencillas ---- */
+function renderEpochs() {
+  const box = $("epochs");
+  const dates = [...new Set(rows.map((o) => { const d = mjdDate(val(o, "t_min")); return d ? d.toISOString().slice(0, 10) : null; }).filter(Boolean))].sort();
+  if (!dates.length) { box.innerHTML = ""; return; }
+  const first = fmtFecha(new Date(dates[0] + "T00:00:00Z"));
+  const last = fmtFecha(new Date(dates[dates.length - 1] + "T00:00:00Z"));
+  $("live").textContent = dates.length === 1
+    ? `SPHEREx fotografió esta zona el ${first}.`
+    : `SPHEREx fotografió esta zona en ${dates.length} fechas distintas, entre el ${first} y el ${last}.`;
+  $("live").className = "notice good";
+  box.innerHTML = dates.map((d) => `<span class="epoch">${esc(fmtFecha(new Date(d + "T00:00:00Z")))}</span>`).join("");
 }
 
 /* ---- Búsqueda IRSA ---- */
@@ -204,7 +141,6 @@ async function search() {
   let ra = $("ra").value.trim(), dec = $("dec").value.trim();
   try {
     if (name && (!ra || !dec)) {
-      $("state").textContent = "RESOLVIENDO";
       const c = await resolveName(name);
       if (!Number.isFinite(Number(c.ra)) || !Number.isFinite(Number(c.dec)))
         throw new Error("No se pudo resolver ese nombre en IRSA.");
@@ -215,76 +151,43 @@ async function search() {
     const r = Number(ra), d = Number(dec);
     if (!Number.isFinite(r) || !Number.isFinite(d) || r < 0 || r >= 360 || d < -90 || d > 90)
       throw new Error("Coordenadas no válidas. RA 0–360, DEC −90 a 90.");
-    const colls = [...document.querySelectorAll("#collections input:checked")].map((x) => x.value);
-    if (!colls.length) throw new Error("Selecciona al menos una colección.");
-    const radius = $("radius").value, maxrec = $("maxrec").value;
+    const radius = $("radius").value;
     updateSpherexFrame(r, d, radius);
     $("searchBtn").disabled = true;
-    $("state").textContent = "CONSULTANDO";
-    live("loading", r, d, radius, 0, colls.join(", "));
-    rows = []; selected = null;
-    $("cutoutBtn").disabled = true; $("fitsBtn").disabled = true;
-    $("details").textContent = "Esperando resultados de IRSA…";
-    const jobs = colls.map(async (collection) => {
-      const res = await fetch(apiUrl("/api/sia", { collection, ra: r, dec: d, radius, maxrec }));
+    live("loading");
+    rows = [];
+    const jobs = COLLECTIONS.map(async (collection) => {
+      const res = await fetch(apiUrl("/api/sia", { collection, ra: r, dec: d, radius, maxrec: MAXREC }));
       const body = await res.text();
       if (!res.ok) throw new Error(collection + ": " + body.slice(0, 200));
-      return { collection, list: parseCSV(body) };
+      return parseCSV(body);
     });
     const done = await Promise.allSettled(jobs);
     const errors = [];
     done.forEach((res, i) => {
-      if (res.status === "fulfilled") res.value.list.forEach((o) => { o._collection = res.value.collection; rows.push(o); });
-      else errors.push(colls[i] + ": " + res.reason.message);
+      if (res.status === "fulfilled") res.value.forEach((o) => rows.push(o));
+      else errors.push(COLLECTIONS[i] + ": " + res.reason.message);
     });
-    $("total").textContent = rows.length;
-    $("ncol").textContent = done.filter((x) => x.status === "fulfilled").length;
-    $("state").textContent = errors.length ? "PARCIAL" : "COMPLETADA";
-    buildFrames(); live(errors.length ? "error" : "ok", r, d, radius, rows.length, colls.join(", "));
+    renderEpochs();
     shareURL();
-    if (errors.length) msg("Algunas colecciones no respondieron: " + errors.join(" | ") + ". Si el radio es grande, prueba 0.05° o 0.03°.", "error");
-    else if (rows.length) msg(`Consulta completada. Se recibieron ${rows.length} registros de IRSA. El Cine tiene ${frames.length} fotogramas.`, "good");
-    else msg("IRSA respondió, pero no devolvió observaciones para estas coordenadas, radio y colecciones.", "");
+    if (errors.length && !rows.length) {
+      live("error");
+      msg("IRSA no respondió esta vez. Intenta de nuevo más tarde o prueba con una zona más pequeña.", "error");
+    } else if (errors.length) {
+      msg("IRSA respondió en parte: algunas colecciones no contestaron, pero sí hay fechas de esta zona.", "error");
+    } else if (rows.length) {
+      msg("Consulta completada. El visor y el mapa ya están en tus coordenadas.", "good");
+    } else {
+      $("live").textContent = "IRSA respondió, pero SPHEREx no tiene fotos de esta zona en las colecciones consultadas.";
+      $("live").className = "notice";
+      msg("IRSA respondió, pero no hay fotos de esta zona. Prueba con otro objeto o una zona más grande.", "");
+    }
   } catch (e) {
-    $("state").textContent = "ERROR"; $("total").textContent = "—"; $("ncol").textContent = "—";
-    live("error", ra, dec, $("radius").value, 0, "");
+    live("error");
     msg(e.message, "error");
   } finally { $("searchBtn").disabled = false; }
 }
-function selectRow(i) {
-  const o = rows[i]; if (!o) return;
-  selected = o;
-  const access = val(o, "access_url");
-  const lo = Number(val(o, "em_min")) * 1e6, hi = Number(val(o, "em_max")) * 1e6;
-  const wave = (Number.isFinite(lo) && Number.isFinite(hi))
-    ? `${lo.toFixed(2)} – ${hi.toFixed(2)} µm`
-    : `${esc(val(o, "em_min"))} – ${esc(val(o, "em_max"))} m`;
-  $("details").innerHTML = `
-    <div><strong>Identificador:</strong> ${esc(val(o, "obs_id", "obs_publisher_did"))}</div>
-    <div><strong>Colección:</strong> ${esc(o._collection)}</div>
-    <div><strong>Objeto:</strong> ${esc(val(o, "target_name", "target"))}</div>
-    <div><strong>Banda:</strong> ${esc(val(o, "energy_bandpassname"))}</div>
-    <div><strong>Longitud de onda:</strong> ${wave}</div>
-    <div><strong>Tiempo:</strong> ${esc(fmtMJD(val(o, "t_min")))}</div>
-    <div><strong>Calibración:</strong> ${esc(val(o, "calib_level"))}</div>
-    <div style="overflow-wrap:anywhere"><strong>URL del producto:</strong><br>${esc(access)}</div>`;
-  $("fitsBtn").disabled = !access || access === "—";
-  $("cutoutBtn").disabled = !access || access === "—";
-  if (!$("viewer").querySelector("iframe")) {
-    $("viewer").innerHTML = '<div class="empty"><div><div style="font-size:40px">✦</div><strong>Observación seleccionada</strong><p>Pulsa “Abrir FITS” para cargarla en el visor.</p></div></div>';
-  }
-  $("viewerInfo").textContent = "Producto seleccionado: " + val(o, "obs_id", "obs_publisher_did");
-}
-function showJS9(cutout) {
-  if (!selected) return;
-  const access = selected.access_url;
-  if (!access || access === "—") return;
-  const params = { url: access };
-  if (cutout) { params.center = $("ra").value + "," + $("dec").value; params.size = $("radius").value; }
-  const fileURL = apiUrl(cutout ? "/api/cutout" : "/api/file", params);
-  $("viewer").innerHTML = `<iframe title="Visor JS9" allowfullscreen src="https://js9.si.edu/js9/js9.html?url=${encodeURIComponent(fileURL)}"></iframe>`;
-  $("viewerInfo").textContent = cutout ? "Recorte FITS solicitado a IRSA. La carga depende del archivo y de JS9." : "Cargando el FITS en JS9. Los productos pueden ser grandes y tardar.";
-}
+
 /* ---- Eventos ---- */
 $("searchBtn").addEventListener("click", search);
 $("spherexSearchBtn").addEventListener("click", search);
@@ -294,23 +197,6 @@ $("spherexOpenBtn").addEventListener("click", () => {
   window.open(spherexAppURL(ra, dec, radius), "_blank", "noopener");
 });
 $("resetBtn").addEventListener("click", resetSearch);
-$("fitsBtn").addEventListener("click", () => showJS9(false));
-$("cutoutBtn").addEventListener("click", () => showJS9(true));
-$("playBtn").addEventListener("click", () => {
-  if (frames.length < 2) return;
-  stopCine(); $("playBtn").classList.add("on"); $("pauseBtn").disabled = false;
-  playTimer = setInterval(() => showFrame(frameIdx + 1, true), Number($("speed").value));
-});
-$("pauseBtn").addEventListener("click", stopCine);
-$("blinkBtn").addEventListener("click", () => {
-  if (frames.length < 2) return;
-  stopCine(); $("blinkBtn").classList.add("on"); $("pauseBtn").disabled = false;
-  blinkTimer = setInterval(() => { blinkSide = !blinkSide; showFrame(blinkSide ? frames.length - 1 : 0, true); }, Math.max(400, Number($("speed").value)));
-});
-$("prevBtn").addEventListener("click", () => { stopCine(); showFrame(frameIdx - 1, true); });
-$("nextBtn").addEventListener("click", () => { stopCine(); showFrame(frameIdx + 1, true); });
-$("speed").addEventListener("input", (e) => { $("speedLabel").textContent = (Number(e.target.value) / 1000).toFixed(1) + " s"; });
-$("band").addEventListener("change", () => { if (rows.length) buildFrames(); });
 $("copyBtn").addEventListener("click", async () => {
   shareURL();
   try { await navigator.clipboard.writeText(location.href); msg("Enlace copiado: " + location.href, "good"); }
@@ -320,7 +206,7 @@ $("healthBtn").addEventListener("click", async () => {
   const box = $("health"); box.style.display = "block"; box.textContent = "Comprobando el servicio…";
   try {
     const r = await fetch(apiUrl("/api/health")); const j = await r.json();
-    box.textContent = `Servicio: ${j.service || "SPHEREx Explorer API"} · Estado: ${j.status || r.status} · IRSA: ${j.irsa || ""} · Colecciones: ${(j.collections || []).join(", ")}`;
+    box.textContent = `Servicio: ${j.service || "SPHEREx Explorer API"} · Estado: ${j.status || r.status} · IRSA: ${j.irsa || ""}`;
     box.className = "notice good";
   } catch (e) { box.textContent = "No se pudo comprobar el servicio: " + e.message; box.className = "notice error"; }
 });

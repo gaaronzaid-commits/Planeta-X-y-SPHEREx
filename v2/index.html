@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#04060d">
 <title>SPHEREx Explorer — Infrared Sky Observatory</title>
-<meta name="description" content="Explora el universo infrarrojo con SPHEREx: busca por coordenadas, observa cómo cambia el cielo con el tiempo y consulta los datos reales de IRSA en vivo.">
+<meta name="description" content="Explora el universo infrarrojo con SPHEREx: busca una región del cielo por coordenadas, mírala en el visor oficial de IRSA y en el mapa real del cielo, y aprende cómo se descubren objetos que se mueven.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
@@ -19,10 +19,9 @@
     <div class="pill" id="status">● IRSA DATA EXPLORER</div>
   </div>
   <nav>
-    <a href="#cine">Cine del cielo</a>
     <a href="#spherex">Visor SPHEREx · IRSA</a>
     <a href="#mapa">Mapa del cielo · IRSA</a>
-    <a href="#guia">Guía</a>
+    <a href="#aprende">Aprende</a>
   </nav>
 </header>
 
@@ -30,16 +29,15 @@
   <section class="hero">
     <div class="kicker">Astronomical Research Interface · SPHEREx · Live IRSA Data</div>
     <h1>Explore the infrared universe. <em>Watch the sky move.</em></h1>
-    <p>SPHEREx cartografía todo el cielo cada seis meses en <strong>102 bandas del infrarrojo cercano</strong>. Asteroides, cometas, estrellas cercanas y enanas marrones se delatan porque <strong>cambian de posición entre imágenes</strong>. Busca una región del cielo, reproduce sus épocas como un video y detecta el movimiento.</p>
+    <p>SPHEREx es un telescopio espacial de la NASA que fotografía todo el cielo en luz infrarroja, una y otra vez. Si comparas dos fotos de la misma zona tomadas en fechas distintas, un asteroide, un cometa o una estrella cercana se habrá movido un poco. Así se han descubierto planetas, cometas y estrellas nuevas. Aquí puedes buscar cualquier zona del cielo y verla con los datos reales de IRSA.</p>
     <div class="steps">
       <div class="step"><b>01</b> Elige un objeto o unas coordenadas</div>
       <div class="step"><b>02</b> Consulta IRSA en tiempo real</div>
-      <div class="step"><b>03</b> Reproduce el Cine y busca lo que se mueve</div>
+      <div class="step"><b>03</b> Explora el visor y el mapa del cielo</div>
     </div>
     <div class="badges">
-      <span class="badge">Misión 01 · Barnard's Star</span>
-      <span class="badge">Misión 02 · WISE 0855</span>
-      <span class="badge">Misión 03 · Epsilon Indi B</span>
+      <span class="badge">Para empezar · Barnard's Star</span>
+      <span class="badge">La más fría · WISE 0855</span>
       <span class="badge">Datos: NASA/IPAC IRSA</span>
     </div>
   </section>
@@ -48,8 +46,8 @@
 
   <div class="grid">
     <aside class="card">
-      <div class="sect-num">01 / PARÁMETROS DE BÚSQUEDA</div>
-      <h2>Elige una región del cielo</h2>
+      <div class="sect-num">01 / BUSCA UNA REGIÓN DEL CIELO</div>
+      <h2>¿A dónde quieres mirar?</h2>
       <div class="fact" id="funFact"><b>Dato:</b> Plutón se descubrió en 1930 porque un punto de luz se había desplazado entre dos fotografías tomadas en fechas distintas. Esa es exactamente la técnica de esta herramienta.</div>
       <label for="name">Nombre del objeto (opcional)</label>
       <input id="name" placeholder="Ej. Barnard's Star">
@@ -57,90 +55,42 @@
         <div><label for="ra">Ascensión recta · RA (°)</label><input id="ra" type="number" step="any" placeholder="269.452077"></div>
         <div><label for="dec">Declinación · DEC (°)</label><input id="dec" type="number" step="any" placeholder="4.693365"></div>
       </div>
-      <p class="small">RA y DEC son las coordenadas ecuatoriales (J2000/ICRS) de un punto del cielo. También puedes pulsar una tarjeta de objeto y se completan solas.</p>
-      <label for="radius">Campo de visión / radio de búsqueda</label>
+      <p class="small">RA y DEC son la dirección de un lugar en el cielo. Pulsa una tarjeta de abajo y se llenan solas.</p>
+      <label for="radius">Tamaño de la zona que quieres ver</label>
       <select id="radius">
-        <option value="0.01">0.01° — 36″ de radio</option>
-        <option value="0.03">0.03° — 1.8′ de radio</option>
-        <option value="0.05" selected>0.05° — 3′ de radio</option>
-        <option value="0.1">0.10° — 6′ de radio</option>
-        <option value="0.25">0.25° — 15′ de radio</option>
-        <option value="0.5">0.50° — 30′ de radio (lento; IRSA puede fallar)</option>
+        <option value="0.01">Pequeña</option>
+        <option value="0.03">Algo pequeña</option>
+        <option value="0.05" selected>Mediana</option>
+        <option value="0.1">Grande</option>
+        <option value="0.25">Muy grande</option>
+        <option value="0.5">Enorme (lenta; IRSA puede fallar)</option>
       </select>
-      <label for="band">Banda del Cine · Detectores SPHEREx</label>
-      <select id="band">
-        <option value="TODAS" selected>Todas — un fotograma por fecha</option>
-        <option value="SPHEREx-D1">D1 · 0.75–1.1 µm</option>
-        <option value="SPHEREx-D2">D2 · 1.1–1.65 µm</option>
-        <option value="SPHEREx-D3">D3 · 1.65–2.4 µm</option>
-        <option value="SPHEREx-D4">D4 · 2.4–3.8 µm</option>
-        <option value="SPHEREx-D5">D5 · 3.8–4.4 µm</option>
-        <option value="SPHEREx-D6">D6 · 4.4–5.0 µm</option>
-      </select>
-      <label>Colecciones IRSA</label>
-      <div class="checks" id="collections">
-        <label><input type="checkbox" value="spherex_dr1" checked> DR1 · Wide Survey</label>
-        <label><input type="checkbox" value="spherex_dr1_deep"> DR1 · Deep Survey</label>
-        <label><input type="checkbox" value="spherex_qr3" checked> QR3 · Wide Survey</label>
-        <label><input type="checkbox" value="spherex_qr3_deep"> QR3 · Deep Survey</label>
-        <label><input type="checkbox" value="spherex_dr1_cube"> DR1 · All-Sky Cube</label>
-      </div>
-      <label for="maxrec">Máximo de registros por colección</label>
-      <select id="maxrec">
-        <option value="10">10 registros</option>
-        <option value="25" selected>25 registros</option>
-        <option value="50">50 registros</option>
-        <option value="100">100 registros</option>
-      </select>
-      <button class="btn primary" id="searchBtn">Consultar IRSA y armar el Cine</button>
+      <button class="btn primary" id="searchBtn">Consultar IRSA</button>
       <button class="btn" id="resetBtn" style="width:100%;margin-top:8px">Restablecer a Barnard (ejemplo)</button>
       <button class="btn" id="copyBtn" style="width:100%;margin-top:8px">Copiar enlace con estas coordenadas</button>
-      <label>Objetos de prueba</label>
+      <label>Objetos para probar</label>
       <div class="objcards">
-        <button class="obj" data-name="Barnard's Star" data-ra="269.452077" data-dec="4.693365"><b>Barnard's Star</b><span>La estrella con mayor movimiento propio conocido. Ideal para empezar.</span></button>
-        <button class="obj" data-name="Epsilon Indi B" data-ra="331.044146" data-dec="-56.782844"><b>Epsilon Indi B</b><span>Par de enanas marrones orbitando una estrella cercana.</span></button>
-        <button class="obj" data-name="WISE 0855" data-ra="133.795125" data-dec="-7.245147"><b>WISE 0855</b><span>La enana marrón más fría conocida; movimiento rápido.</span></button>
-        <button class="obj" data-name="RW Aurigae" data-ra="76.956526" data-dec="30.401438"><b>RW Aurigae</b><span>Estrella variable joven; busca cambios de brillo.</span></button>
-        <button class="obj" data-name="R Draconis" data-ra="248.167625" data-dec="66.754972"><b>R Draconis</b><span>Variable Mira de periodo 245.6 días.</span></button>
+        <button class="obj" data-name="Barnard's Star" data-ra="269.452077" data-dec="4.693365"><b>Barnard's Star</b><span>La estrella que más rápido se mueve en el cielo.</span></button>
+        <button class="obj" data-name="Epsilon Indi B" data-ra="331.044146" data-dec="-56.782844"><b>Epsilon Indi B</b><span>Dos enanas marrones que orbitan juntas.</span></button>
+        <button class="obj" data-name="WISE 0855" data-ra="133.795125" data-dec="-7.245147"><b>WISE 0855</b><span>La enana marrón más fría que conocemos.</span></button>
+        <button class="obj" data-name="RW Aurigae" data-ra="76.956526" data-dec="30.401438"><b>RW Aurigae</b><span>Una estrella joven que cambia de brillo.</span></button>
+        <button class="obj" data-name="R Draconis" data-ra="248.167625" data-dec="66.754972"><b>R Draconis</b><span>Una estrella que late cada varios meses.</span></button>
       </div>
     </aside>
 
     <section class="stack">
-      <div class="stats">
-        <div class="stat"><small>REGISTROS ENCONTRADOS</small><strong id="total">—</strong></div>
-        <div class="stat"><small>COLECCIONES CONSULTADAS</small><strong id="ncol">—</strong></div>
-        <div class="stat"><small>ESTADO DE CONSULTA</small><strong id="state" style="font-size:15px">EN ESPERA</strong></div>
-      </div>
-
       <section class="card">
         <div class="sect-num">DATOS EN VIVO</div>
-        <h3>IRSA en tiempo real</h3>
-        <div id="live" class="notice">Sin consulta todavía. Los datos se obtienen en tiempo real desde IRSA al pulsar la búsqueda. No hay observaciones precargadas.</div>
+        <h3>¿Cuándo fotografió SPHEREx esta zona?</h3>
+        <div id="live" class="notice">Sin consulta todavía. Pulsa “Consultar IRSA” y te diremos en qué fechas SPHEREx fotografió esta zona del cielo. Los datos llegan en tiempo real desde IRSA; no hay nada precargado.</div>
+        <div class="epochs" id="epochs"></div>
         <p class="small" id="liveMeta">Fuente: NASA/IPAC IRSA · SPHEREx · Última consulta: —</p>
       </section>
 
-      <section class="card" id="cine">
-        <div class="sect-num">02 / LÍNEA DE TIEMPO</div>
-        <h3>Cine del cielo — Play y Parpadeo</h3>
-        <p class="small">Cada fotograma es una fecha distinta devuelta por IRSA para este centro. <strong>Play</strong> recorre las fechas en orden. <strong>Parpadeo</strong> alterna entre la primera y la última época: un objeto en movimiento parecerá saltar; uno variable parecerá encenderse y apagarse. Es comparación visual, no una resta de píxeles calculada en el servidor. Pulsa un fotograma para ver su información y cargar su FITS. RA / DEC de IRSA es el centro de cada exposición (s_ra / s_dec), no la posición exacta de una fuente: cada exposición cubre unos 3.5° de cielo.</p>
-        <div class="controls">
-          <button class="btn" id="playBtn" disabled>▶ Play</button>
-          <button class="btn" id="pauseBtn" disabled>⏸ Pausa</button>
-          <button class="btn" id="blinkBtn" disabled>◐ Parpadeo · 1ª ↔ última</button>
-          <button class="btn" id="prevBtn" disabled>‹ Anterior</button>
-          <button class="btn" id="nextBtn" disabled>Siguiente ›</button>
-          <label style="margin:0">Velocidad <input type="range" id="speed" min="400" max="3000" step="100" value="1200"> <span id="speedLabel">1.2 s</span></label>
-        </div>
-        <div class="timeline" id="timeline"><span class="small">Realiza una consulta para construir la línea de tiempo con las fechas reales de IRSA.</span></div>
-        <div class="mono" id="frameInfo">Fotograma: —</div>
-        <div id="bands" style="margin-top:14px"></div>
-        <p class="small" id="frameCount">Sin fotogramas todavía</p>
-      </section>
-
       <section class="card" id="spherex">
-        <div class="sect-num">03 / APLICACIÓN OFICIAL IRSA</div>
+        <div class="sect-num">02 / APLICACIÓN OFICIAL IRSA</div>
         <h3>Visor SPHEREx de IRSA — Imágenes espectrales</h3>
-        <p class="small">Aplicación oficial de IRSA para SPHEREx (búsqueda de imágenes espectrales), incrustada en esta página. Al pulsar la búsqueda, este visor también se centra en tus coordenadas. Si IRSA impide mostrarlo dentro de la ventana, usa “Abrir IRSA completo”.</p>
+        <p class="small">La aplicación oficial de IRSA para SPHEREx, dentro de esta página. Al pulsar “Consultar IRSA”, este visor también viaja a tus coordenadas. Si IRSA impide mostrarlo dentro de la ventana, usa “Abrir IRSA completo”.</p>
         <div class="controls">
           <button class="btn primary" id="spherexSearchBtn" style="width:auto;margin-top:0">Run IRSA Search</button>
           <button class="btn" id="spherexOpenBtn">Open Full IRSA ↗</button>
@@ -153,7 +103,7 @@
       </section>
 
       <section class="card" id="mapa">
-        <div class="sect-num">04 / MAPA INTERACTIVO</div>
+        <div class="sect-num">03 / MAPA INTERACTIVO</div>
         <h3>Mapa real del cielo · IRSA Viewer y Finder Chart</h3>
         <p class="small">El mapa interactivo de IRSA. Escribe RA y DEC y pulsa “Ver en el mapa”: el mapa se centrará en ese punto. También puedes introducir coordenadas directamente dentro del mapa.</p>
         <div class="two">
@@ -174,25 +124,8 @@
         <p class="small" id="mapNote">Mapa actual: IRSA Viewer, todo el cielo. Introduce unas coordenadas para viajar a una región.</p>
       </section>
 
-      <section class="card" id="visor">
-        <div class="sect-num">05 / VISOR FITS</div>
-        <h3>Visor de imágenes FITS</h3>
-        <p>
-          <button class="btn" id="cutoutBtn" disabled>Crear recorte</button>
-          <button class="btn" id="fitsBtn" disabled>Abrir FITS</button>
-        </p>
-        <div class="viewer" id="viewer"><div class="empty"><div><div style="font-size:40px">⌁</div><strong>Visor astronómico</strong><p>Selecciona una observación de la tabla o un fotograma del Cine para cargar su archivo FITS.</p></div></div></div>
-        <p class="small" id="viewerInfo">El visor utiliza JS9 para interpretar archivos FITS. Los datos proceden del archivo IRSA, no de imágenes de muestra.</p>
-      </section>
-
-      <section class="card">
-        <div class="sect-num">06 / PRODUCTO SELECCIONADO</div>
-        <h3>Información del producto</h3>
-        <div id="details" class="notice">Aún no hay una observación seleccionada.</div>
-      </section>
-
       <section class="card" id="irsa">
-        <div class="sect-num">07 / ARCHIVO EN VIVO</div>
+        <div class="sect-num">04 / ARCHIVO EN VIVO</div>
         <h3>IRSA en vivo — documentación del archivo</h3>
         <p class="small">Documentación oficial de SPHEREx en IRSA, incrustada en esta página. Todos los datos mostrados proceden únicamente de IRSA.</p>
         <p>
@@ -203,17 +136,33 @@
         <iframe class="irsa" title="Documentación del archivo SPHEREx en IRSA" src="https://irsa.ipac.caltech.edu/spherex-archive-documentation/"></iframe>
       </section>
 
-      <section class="card" id="guia">
-        <div class="sect-num">08 / GUÍA Y OBJETIVOS</div>
-        <h3>Guía de observación</h3>
+      <section class="card" id="aprende">
+        <div class="sect-num">05 / APRENDE</div>
+        <h3>Todo lo que necesitas saber para explorar el cielo</h3>
         <div class="cards">
-          <div class="info"><h4>01 · Busca movimiento</h4><p>Compara la misma zona en dos fechas. Un asteroide se desplaza entre épocas; una estrella cercana avanza poco a poco; una variable cambia de brillo. Anota fecha, obs_id y banda antes de concluir nada.</p></div>
-          <div class="info"><h4>02 · Las 102 bandas</h4><p>SPHEREx observa en 102 bandas del infrarrojo cercano, agrupadas en 6 detectores (D1–D6). Bajo el Cine verás la cobertura real en longitud de onda (em_min–em_max) que IRSA devolvió para tu búsqueda.</p></div>
-          <div class="info"><h4>03 · Objetos de prueba</h4><p class="mono">Barnard · 269.452077, +4.693365<br>Epsilon Indi B · 331.044146, −56.782844<br>WISE 0855 · 133.795125, −7.245147<br>RW Aur · 76.956526, +30.401438<br>R Dra · 248.167625, +66.754972</p><p style="margin-top:8px">Empieza por Barnard y WISE 0855, los de mayor movimiento propio.</p></div>
-          <div class="info"><h4>04 · Lee los metadatos</h4><p><span class="mono">t_min</span> es la fecha de la exposición, aquí en calendario con su MJD original. <span class="mono">s_ra / s_dec</span> es el centro de la exposición. <span class="mono">em_min / em_max</span> es el rango de longitud de onda de la banda.</p></div>
-          <div class="info"><h4>05 · Límites honestos</h4><p>SPHEREx revisita cada zona cada ~6 meses; la línea de tiempo depende de lo publicado en IRSA. Con radios grandes IRSA puede tardar o fallar. Un movimiento menor que un píxel (6.15″) no se verá saltar entre dos épocas.</p></div>
-          <div class="info"><h4>06 · Si ves algo inusual</h4><p>Guarda el enlace con coordenadas y anota obs_id, fecha y banda. Si el punto se desplaza de forma coherente en tres o más épocas, merece una segunda revisión.</p></div>
+          <div class="info"><h4>¿Qué es SPHEREx?</h4><p>Es un telescopio espacial de la NASA que observa el cielo en luz infrarroja. Desde 2025 recorre todo el cielo una y otra vez, tomando fotografías en muchos colores invisibles para el ojo humano. Con esas fotos, los astrónomos estudian galaxias, estrellas, cometas y el origen del agua y de las moléculas de la vida en el universo.</p></div>
+          <div class="info"><h4>¿Qué es la luz infrarroja?</h4><p>Es un tipo de luz que nuestros ojos no pueden ver, pero que se siente como calor. Muchos objetos del espacio brillan más en infrarrojo que en luz visible: las estrellas recién nacidas, el polvo entre las estrellas y los objetos fríos como las enanas marrones. SPHEREx ve el universo en esa luz.</p></div>
+          <div class="info"><h4>¿Cómo se descubre algo que se mueve?</h4><p>Se toman dos fotos de la misma zona en fechas distintas y se comparan. Casi todo el cielo se queda igual, pero un objeto cercano se habrá desplazado un poco. Así se descubrió Plutón en 1930 y así se han encontrado miles de asteroides, cometas y enanas marrones, muchas veces con ayuda de voluntarios de todo el mundo.</p></div>
+          <div class="info"><h4>¿Qué se puede encontrar?</h4><p>Asteroides y cometas que orbitan el Sol; estrellas cercanas que caminan por el cielo; enanas marrones, objetos demasiado grandes para ser planetas y demasiado pequeños para brillar como estrellas; y estrellas variables, que se encienden y se apagan con el tiempo.</p></div>
+          <div class="info"><h4>¿Qué es el Planeta X?</h4><p>Es la idea de que podría existir un planeta grande y lejano, más allá de Neptuno, que aún no hemos visto. Nadie lo ha encontrado todavía: es una hipótesis. Buscarlo significa revisar el cielo infrarrojo en busca de algo que se mueva muy despacio, como lo haría un planeta lejano y frío.</p></div>
+          <div class="info"><h4>¿Por qué volver cada seis meses?</h4><p>SPHEREx revisita cada zona del cielo aproximadamente cada seis meses. Eso crea un álbum de fotos del mismo lugar en distintas épocas. Cuanto más tiempo pasa entre dos fotos, más se nota el movimiento de los objetos cercanos. Por eso las fechas importan tanto como las imágenes.</p></div>
         </div>
+        <h3 style="margin-top:24px">Palabras sencillas</h3>
+        <div class="cards">
+          <div class="info"><h4>Ascensión recta (RA) y declinación (DEC)</h4><p>Son la dirección de un lugar en el cielo, como la longitud y la latitud en un mapa de la Tierra.</p></div>
+          <div class="info"><h4>Época</h4><p>Una fecha en la que se tomó una foto del cielo. Comparar épocas es comparar el antes y el después.</p></div>
+          <div class="info"><h4>Exposición</h4><p>Una sola fotografía tomada por el telescopio. Cada una cubre un pedazo grande del cielo.</p></div>
+          <div class="info"><h4>Archivo</h4><p>El lugar donde se guardan todas las fotos y los datos de una misión, para que cualquiera pueda consultarlos.</p></div>
+          <div class="info"><h4>Enana marrón</h4><p>Un objeto más grande que un planeta gigante, pero sin masa suficiente para encenderse como una estrella. Son frías y brillan sobre todo en infrarrojo.</p></div>
+          <div class="info"><h4>Estrella variable</h4><p>Una estrella cuyo brillo sube y baja con el tiempo, como si respirara.</p></div>
+        </div>
+        <h3 style="margin-top:24px">Objetos para empezar</h3>
+        <p class="small">Pulsa una tarjeta en el panel de búsqueda y se llenan las coordenadas solas.</p>
+        <p class="mono">Barnard's Star · 269.452077, +4.693365 — la estrella que más rápido se mueve.<br>
+        Epsilon Indi B · 331.044146, −56.782844 — dos enanas marrones juntas.<br>
+        WISE 0855 · 133.795125, −7.245147 — la enana marrón más fría conocida.<br>
+        RW Aurigae · 76.956526, +30.401438 — una estrella joven que cambia de brillo.<br>
+        R Draconis · 248.167625, +66.754972 — una estrella que late cada varios meses.</p>
         <h3 style="margin-top:24px">Planet X · Research objectives</h3>
         <p class="small">Líneas de investigación para el estudio de posibles objetos astronómicos mediante observaciones infrarrojas. El Planeta X es hipotético: aquí se buscan candidatos, no se afirma su existencia.</p>
         <div class="cards">
